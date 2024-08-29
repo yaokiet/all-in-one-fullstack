@@ -1,4 +1,4 @@
-# SPMDev
+# all-in-one
 
 ### Project Overview ###
 The Work-from-Home (WFH) Tracking System is a web-based application designed to streamline the process of managing flexible work arrangements for businesses. It provides a centralized portal for staff to apply for regular or ad-hoc WFH days, and for managers, HR, and senior management to effectively track, approve, and oversee employee schedules. Built with scalability in mind, the system aims to enhance efficiency and transparency in managing flexible work environments.
