@@ -12,11 +12,10 @@ export default function Home() {
   //useEffect ...
 
   return (
-    <div className=" w-full h-full bg-red-200 flex flex-col  ">
+    <div className="w-full h-screen border border-gray-200 bg-red-200 flex flex-row">
+      {pageState === "hompage" && <h1 className=" h-10 ">Home Page</h1>}
 
-      {pageState === "hompage" && (<h1>Home Page</h1>)}
-
-      <div className=" w-full h-full bg-red-50">
+      <div className="  bg-red-50">
         <Navbar pageState={pageState} />
 
         <DatePicker />
