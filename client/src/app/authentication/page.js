@@ -52,9 +52,9 @@ export default function LoginPage() {
                             className="max-w-xs"
                             color={colorMap.primary}
                         />
-                        <div className="flex items-center justify-between text-sm">
+                        {/* <div className="flex items-center justify-between text-sm">
                             <a href="#" className="text-gray-500">Forgot Password?</a>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
                 <div className="w-24 bg-gray-800 flex items-center justify-center">
