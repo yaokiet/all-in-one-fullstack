@@ -1,1 +1,9 @@
+
+# Ignore the .vercel directory
 .vercel
+
+# Ignore all __pycache__ directories
+**/__pycache__/
+
+# Ignore .pyc files globally (compiled Python files)
+*.pyc

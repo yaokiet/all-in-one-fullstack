@@ -22,34 +22,47 @@ def get_user_by_staff_id(staff_id):
     # Assuming User model has a serialize() method to convert object to JSON
     return jsonify(user.serialize())
 
+    # hello!
+
 @user_bp.route('/login', methods=['POST'])
 def login():
     # Get JSON data from the request
-    data = request.get_json()
-    
-    if not data or not data.get('email') or not data.get('password'):
-        return jsonify({
-            'code': 400, 
-            'message':"Email and password are required"
-            })
-    
-    email = data['email']
-    password = data['password']
-    
-    # Query the database for the user by email
-    user = User.query.filter_by(Email=email).first()
-    
-    if not user:
-        return jsonify({
-            'code': 400, 
-            'message':"User not found"
-            })
+    try: 
+        data = request.get_json()
         
-    
-    # If login is successful, you might want to return some kind of session token or user data
+        if not data or not data.get('email') or not data.get('password'):
+            return jsonify({
+                'code': 400, 
+                'message':"Email and password are required"
+                })
+        
+        email = data['email']
+        password = data['password']
+        
+        # Query the database for the user by email
+        user = User.query.filter_by(Email=email).first()
+        
+        if not user:
+            return jsonify({
+                'code': 400, 
+                'message':"User not found"
+                })
+
+        return jsonify({
+            'message': 'Login successful',
+            'code' : 201,
+            'user': user.serialize()  # Assuming the User model has a serialize() method
+        })
+
+    except Exception as e:
+        return jsonify({
+            'code': 500, 
+           'message': str(e)
+            })
+
     return jsonify({
-        'message': 'Login successful',
-        'code' : 201,
-        'user': user.serialize()  # Assuming the User model has a serialize() method
-    })
+        "code": 400,
+        "message": "Invalid JSON input: " + str(request.get_data())
+    }), 400
+
 
