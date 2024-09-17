@@ -1,33 +1,18 @@
-import React from "react";
-import { Input, Button, Checkbox } from "@nextui-org/react";
+"use client"; // Mark this as a Client Component
 
-// // Email component
-// export function Email() {
-//     return (
-//         <Input
-//             isRequired
-//             type="email"
-//             label="Email"
-//             defaultValue=""
-//             className="max-w-xs"
-//         />
-//     );
-// }
-
-// // Password component
-// export function Password() {
-//     return (
-//         <Input
-//             isRequired
-//             type="password"
-//             label="Password"
-//             defaultValue=""
-//             className="max-w-xs"
-//         />
-//     );
-// }
+import React, { useState } from "react";
+import { useRouter } from 'next/navigation'; // Import useRouter from Next.js
+import { Input, Button } from "@nextui-org/react";
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/solid'; // Import eye icons from Heroicons
 
 export default function LoginPage() {
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false); // Track password visibility
+    const [message, setMessage] = useState(''); // Used for both success and error messages
+    const [messageColor, setMessageColor] = useState(''); // To handle message color
+    const router = useRouter(); // Initialize the router hook
+
     const colorMap = {
         default: 'default',
         primary: 'primary',
@@ -42,24 +27,42 @@ export default function LoginPage() {
                         <Input
                             type="text"
                             label="Username"
-                            defaultValue=""
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
                             className="max-w-xs"
                             color={colorMap.primary}
                         />
-                        <Input
-                            type="email"
-                            label="Email"
-                            defaultValue=""
-                            className="max-w-xs"
-                            color={colorMap.primary}
-                        />
-                        {/* <div className="flex items-center justify-between text-sm">
-                            <a href="#" className="text-gray-500">Forgot Password?</a>
-                        </div> */}
+                        <div className="relative max-w-xs">
+                            <Input
+                                type={showPassword ? "text" : "password"} // Toggle between text and password
+                                label="Password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                color={colorMap.primary}
+                                className="w-full"
+                            />
+                            <button
+                                type="button"
+                                onClick={togglePasswordVisibility}
+                                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-900"
+                            >
+                                {showPassword ? (
+                                    <EyeSlashIcon className="h-6 w-6" /> // EyeSlashIcon for "hide"
+                                ) : (
+                                    <EyeIcon className="h-6 w-6" /> // EyeIcon for "show"
+                                )}
+                            </button>
+                        </div>
+                        {message && (
+                            <p className={`${messageColor}`}>{message}</p>
+                        )}
                     </div>
                 </div>
                 <div className="w-24 bg-gray-800 flex items-center justify-center">
-                    <Button className="bg-gray-800 text-white hover:bg-gray-700">
+                    <Button
+                        className="bg-gray-800 text-white hover:bg-gray-700"
+                        onClick={handleLogin}
+                    >
                         LOGIN
                     </Button>
                 </div>
@@ -67,5 +70,4 @@ export default function LoginPage() {
         </div>
     );
 }
-
 
