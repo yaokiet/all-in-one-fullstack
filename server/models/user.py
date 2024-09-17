@@ -2,8 +2,6 @@ from extensions import db
 from datetime import timedelta
 
 
-
-
 class User(db.Model):
     __tablename__ = 'users'
 
