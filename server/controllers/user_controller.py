@@ -4,25 +4,52 @@ from models.user import User
 
 user_bp = Blueprint('user', __name__)
 
+# Route to get all users
 @user_bp.route('/users', methods=['GET'])
 def get_users():
     users = User.query.all()
     return jsonify([user.serialize() for user in users])
 
-# Fetch user by their ID
-@user_bp.route('/users/<int:id>', methods=['GET'])
-def get_user(id):
-    user = User.query.get(id)
+# Route to fetch a user by their Staff_Id
+@user_bp.route('/users/<int:staff_id>', methods=['GET'])
+def get_user_by_staff_id(staff_id):
+    # Query the User model using Staff_Id
+    user = User.query.filter_by(Staff_ID=staff_id).first()
+    
     if not user:
         return abort(404, description="User not found")
+    
+    # Assuming User model has a serialize() method to convert object to JSON
     return jsonify(user.serialize())
 
-@user_bp.route('/users', methods=['POST'])
-def create_user():
-    data = request.json
-    if 'username' not in data or 'email' not in data:
-        return jsonify({'error': 'Invalid input, username and email are required'}), 400
-    new_user = User(username=data['username'], email=data['email'])
-    db.session.add(new_user)
-    db.session.commit()
-    return jsonify(new_user.serialize()), 201
+@user_bp.route('/login', methods=['POST'])
+def login():
+    # Get JSON data from the request
+    data = request.get_json()
+    
+    if not data or not data.get('email') or not data.get('password'):
+        return jsonify({
+            'code': 400, 
+            'message':"Email and password are required"
+            })
+    
+    email = data['email']
+    password = data['password']
+    
+    # Query the database for the user by email
+    user = User.query.filter_by(Email=email).first()
+    
+    if not user:
+        return jsonify({
+            'code': 400, 
+            'message':"User not found"
+            })
+        
+    
+    # If login is successful, you might want to return some kind of session token or user data
+    return jsonify({
+        'message': 'Login successful',
+        'code' : 201,
+        'user': user.serialize()  # Assuming the User model has a serialize() method
+    })
+
