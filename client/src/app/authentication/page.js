@@ -33,6 +33,7 @@ export default function LoginPage() {
         primary: 'primary',
     };
 
+
     return (
         <div className="w-full h-screen flex items-center justify-center bg-slate-500">
             <div className="flex overflow-hidden rounded-lg shadow-lg w-[400px] h-[300px] md:w-[600px] md:h-[400px]">
