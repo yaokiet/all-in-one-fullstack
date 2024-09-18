@@ -22,7 +22,6 @@ def get_user_by_staff_id(staff_id):
     # Assuming User model has a serialize() method to convert object to JSON
     return jsonify(user.serialize())
 
-    # hello!
 
 @user_bp.route('/login', methods=['POST'])
 def login():
