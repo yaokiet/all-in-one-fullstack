@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 
 export default function OwnSchedule() {
     const [week, setWeek] = useState([]);
@@ -31,11 +31,15 @@ export default function OwnSchedule() {
         setWeek(days);
     };
 
-    useEffect(() => {
+    const getCurrentWeekStart = () => {
         const today = new Date();
         const dayOfWeek = today.getDay();
         const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-        const startOfWeek = new Date(today.setDate(diff));
+        return new Date(today.setDate(diff));
+    };
+
+    useEffect(() => {
+        const startOfWeek = getCurrentWeekStart();
         setCurrentWeekStart(startOfWeek);
         generateWeek(startOfWeek);
     }, []);
@@ -45,6 +49,12 @@ export default function OwnSchedule() {
         newWeekStart.setDate(currentWeekStart.getDate() + (direction === 'next' ? 7 : -7));
         setCurrentWeekStart(newWeekStart);
         generateWeek(newWeekStart);
+    };
+
+    const returnToCurrentWeek = () => {
+        const startOfWeek = getCurrentWeekStart();
+        setCurrentWeekStart(startOfWeek);
+        generateWeek(startOfWeek);
     };
 
     const getWorkModeColor = (mode) => {
@@ -98,9 +108,18 @@ export default function OwnSchedule() {
                                 >
                                     <ChevronLeft className="h-5 w-5" />
                                 </button>
-                                <h2 className="text-xl font-bold">
-                                    {week.length > 0 && formatDateRange(week[0], week[4])}
-                                </h2>
+                                <div className="flex items-center">
+                                    <h2 className="text-xl font-bold mr-4">
+                                        {week.length > 0 && formatDateRange(week[0], week[4])}
+                                    </h2>
+                                    <button
+                                        onClick={returnToCurrentWeek}
+                                        className="p-2 bg-green-500 text-white rounded hover:bg-green-600 flex items-center"
+                                    >
+                                        <Calendar className="h-5 w-5 mr-1" />
+                                        Today
+                                    </button>
+                                </div>
                                 <button 
                                     onClick={() => navigateWeek('next')}
                                     className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
