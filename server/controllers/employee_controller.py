@@ -49,7 +49,7 @@ def login():
 
         return jsonify({
             'message': 'Login successful',
-            'code' : 201,
+            'code' : 200,
             'employee': employee.serialize()  
         })
 

@@ -88,4 +88,30 @@ def test_create_and_delete_employee(client):
     assert response.status_code == 404
 
 def test_login(client):
-    pass
+    # Step 1: Create a new dummy employee
+    employee_data = {
+        "staff_fname": "John",
+        "staff_lname": "Doe",
+        "dept": "Engineering",
+        "position": "Software Engineer",
+        "country": "USA",
+        "email": "john.doe@example.com",
+        "role": 1,
+        "reporting_manager": None  # No manager for this test case
+    }
+
+    # Step 2: Create the employee by making a POST request
+    response = client.post('/employees', json=employee_data)
+    assert response.status_code == 201
+    employee_json = response.get_json()
+    
+    assert employee_json['employee']['staff_fname'] == "John"
+    created_employee_id = employee_json['employee']['staff_id']
+    
+    # Step 3: Make login post request and validate
+    login_package = {
+        "email":"john.doe@example.com",
+        "password":"Abcdefgh1"
+    }
+    response = client.post('/login',json=login_package)
+    assert response.status_code == 200

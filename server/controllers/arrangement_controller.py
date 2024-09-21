@@ -17,9 +17,9 @@ def view_all_arrangements():
     # Corrected list comprehension
     return jsonify([work_arrangement.serialize() for work_arrangement in work_arrangements])
 
-# This route is to view one's own working arrangements
+# This route is to view one's own working arrangements for a given date range
 @arrangements_bp.route('/arrangements', methods=['GET'])
-def view_own_arrangement():
+def view_own_arrangements_in_date_range():
     staff_id = request.args.get('staff_id')
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
@@ -43,7 +43,7 @@ def view_own_arrangement():
 
     # This line will fetch all work arrangements for a logged-in employee
     # It will be filtered to a specific date range
-    work_arrangements = Arrangement.query.filter_by(staff_id=staff_id).filter(
+    work_arrangements = Arrangement.query.filter_by(Staff_ID=staff_id).filter(
         Arrangement.Arrangement_Date.between(start_date,end_date)
     ).all()
 
@@ -54,28 +54,4 @@ def view_own_arrangement():
         }), 404
 
     # Corrected list comprehension
-    return jsonify([work_arrangement.serialize() for work_arrangement in work_arrangements])
-
-# This route is to get all working arrangements for a given staff_id
-@arrangements_bp.route('/arrangements/all', methods=['GET'])
-def get_all_arrangements():
-    staff_id = request.args.get('staff_id')
-
-    # Ensure staff_id is provided
-    if not staff_id:
-        return jsonify({
-            'message': 'Staff ID is required',
-            'code': 400
-        }), 400
-
-    # Fetch all work arrangements for the provided staff_id
-    work_arrangements = Arrangement.query.filter_by(staff_id=staff_id).all()
-
-    if not work_arrangements:
-        return jsonify({
-            'message': 'No work arrangements found for this employee',
-            'code': 404
-        }), 404
-
-    # Return all work arrangements as a list of serialized objects
     return jsonify([work_arrangement.serialize() for work_arrangement in work_arrangements])
