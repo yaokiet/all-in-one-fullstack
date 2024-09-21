@@ -4,6 +4,9 @@ from flask_cors import CORS
 from extensions import db
 from flask_migrate import Migrate
 from controllers.user_controller import user_bp
+from controllers.arrangement_controller import arrangements_bp
+from controllers.employee_controller import employee_bp
+
 
 
 def create_app():
@@ -20,6 +23,8 @@ def create_app():
 
     # Register Blueprints
     app.register_blueprint(user_bp)
+    app.register_blueprint(arrangements_bp)
+    app.register_blueprint(employee_bp)
 
     return app
 

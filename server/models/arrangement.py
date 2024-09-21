@@ -1,11 +1,11 @@
 from extensions import db
 
-class WorkArrangement(db.Model):
+class Arrangement(db.Model):
     __tablename__ = 'work_arrangements'
 
     Arrangement_ID = db.Column(db.Integer, primary_key = True)
-    Staff_ID = db.Column(db.Integer, db.ForeignKey('users.Staff_ID'),nullable = False)
-    Approving_ID = db.Column(db.Integer, db.ForeignKey('users.Staff_ID') , nullable = False)
+    Staff_ID = db.Column(db.Integer, db.ForeignKey('employees.Staff_ID'),nullable = False)
+    Approving_ID = db.Column(db.Integer, db.ForeignKey('employees.Staff_ID') , nullable = False)
     Arrangement_Type = db.Column(db.String(20), nullable = False)
     Arrangement_Date = db.Column(db.Date, nullable = False)
     Status = db.Column(db.String(20), nullable = False)
