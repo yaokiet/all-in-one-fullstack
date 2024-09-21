@@ -28,4 +28,6 @@ jobs:
 
       - name: Run pytest
         run: |
+          cd server
+          cd testing
           pytest --maxfail=1 --disable-warnings  # You can customize this command
