@@ -6,7 +6,7 @@ employee_bp = Blueprint('employee', __name__)
 
 # Route to get all employees
 @employee_bp.route('/employees', methods=['GET'])
-def get_employees():
+def get_all_employees():
     employees = Employee.query.all()
     return jsonify([employee.serialize() for employee in employees])
 
@@ -14,7 +14,7 @@ def get_employees():
 @employee_bp.route('/employees/<int:staff_id>', methods=['GET'])
 def get_employee_by_staff_id(staff_id):
     # Query the Employee model using staff_id
-    employee = Employee.query.filter_by(staff_id=staff_id).first()
+    employee = Employee.query.filter_by(Staff_ID=staff_id).first()
     
     if not employee:
         return abort(404, description="User not found")
@@ -65,3 +65,90 @@ def login():
     }), 400
 
 
+# Create a new employee. This is for automated testing
+@employee_bp.route('/employees', methods=['POST'])
+def create_employee():
+    try:
+        # Get JSON data from the request
+        data = request.get_json()
+
+        # Validate the required fields
+        required_fields = ['staff_fname', 'staff_lname', 'dept', 'position', 'country', 'email', 'role']
+        if not all(field in data for field in required_fields):
+            return jsonify({
+                'code': 400,
+                'message': 'Missing required fields: staff_fname, staff_lname, dept, position, country, email, role'
+            }), 400
+
+        # Extract values from the request
+        staff_fname = data['staff_fname']
+        staff_lname = data['staff_lname']
+        dept = data['dept']
+        position = data['position']
+        country = data['country']
+        email = data['email']
+        role = data['role']
+        reporting_manager = data.get('reporting_manager', None)  # This can be optional
+
+        # Check if the employee with the same email already exists
+        if Employee.query.filter_by(Email=email).first():
+            return jsonify({
+                'code': 400,
+                'message': 'Employee with this email already exists'
+            }), 400
+
+        # Create a new Employee object
+        new_employee = Employee(
+            Staff_FName=staff_fname,
+            Staff_LName=staff_lname,
+            Dept=dept,
+            Position=position,
+            Country=country,
+            Email=email,
+            Role=role,
+            Reporting_Manager=reporting_manager  # Optional field for manager
+        )
+
+        # Add and commit the new employee to the database
+        db.session.add(new_employee)
+        db.session.commit()
+
+        # Return the newly created employee data
+        return jsonify({
+            'message': 'Employee created successfully',
+            'code': 201,
+            'employee': new_employee.serialize()
+        }), 201
+
+    except Exception as e:
+        return jsonify({
+            'code': 500,
+            'message': str(e)
+        }), 500
+
+@employee_bp.route('/employees/<int:staff_id>', methods=['DELETE'])
+def delete_employee(staff_id):
+    try:
+        # Query the database for the employee by staff_id
+        employee = Employee.query.filter_by(Staff_ID=staff_id).first()
+
+        if not employee:
+            return jsonify({
+                'code': 404,
+                'message': 'Employee not found'
+            }), 404
+
+        # Delete the employee from the database
+        db.session.delete(employee)
+        db.session.commit()
+
+        return jsonify({
+            'message': f'Employee with staff_id {staff_id} deleted successfully',
+            'code': 200
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            'code': 500,
+            'message': str(e)
+        }), 500

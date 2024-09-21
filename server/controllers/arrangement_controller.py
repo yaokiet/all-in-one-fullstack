@@ -5,10 +5,10 @@ from datetime import datetime
 arrangements_bp = Blueprint('arrangement', __name__)
 
 # This route views all arrangements for debugging purposes
-@arrangements_bp.route('/arrangements/all',methods=['get'])
+@arrangements_bp.route('/arrangements_all',methods=['GET'])
 def view_all_arrangements():
     # It will be filtered to a specific date range
-    work_arrangements = Arrangement.all()
+    work_arrangements = Arrangement.query.all()
     if not work_arrangements:
         return jsonify({
             'message': 'No work arrangements found for this employee',
