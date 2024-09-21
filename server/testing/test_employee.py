@@ -2,13 +2,14 @@ import pytest
 from app import create_app
 from extensions import db
 from models.employee import Employee
+from config import TestingConfig
 
 @pytest.fixture
 def client():
     # Set up Flask test client and application context
-    app = create_app()
-    app.config['TESTING'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'  # In-memory database for testing
+    app = create_app(TestingConfig)
+    # app.config['TESTING'] = True
+    # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'  # In-memory database for testing
 
     with app.test_client() as client:
         with app.app_context():

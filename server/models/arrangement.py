@@ -21,5 +21,5 @@ class Arrangement(db.Model):
             'arrangement_date' : self.Arrangement_Date.isoformat(),
             'status' : self.Status,
             'application_date' : self.Application_Date.isoformat(),
-            'approval_date' : self.Approval_Date.isoformat()
+            'approval_date' : self.Approval_Date.isoformat() if self.Approval_Date else None
         }
