@@ -6,7 +6,7 @@ class Employee(db.Model):
 
     # Define your columns
     Staff_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    Reporting_Manager = db.Column(db.Integer, db.ForeignKey('employees.Staff_ID'))
+    Reporting_Manager = db.Column(db.Integer, db.ForeignKey('employees.Staff_ID'), nullable=True)
     Staff_FName = db.Column(db.String(50), nullable=False) 
     Staff_LName = db.Column(db.String(50), nullable=False) 
     Dept = db.Column(db.String(50), nullable = False)

@@ -10,7 +10,7 @@ class Arrangement(db.Model):
     Arrangement_Date = db.Column(db.Date, nullable = False)
     Status = db.Column(db.String(20), nullable = False)
     Application_Date = db.Column(db.DateTime, nullable = False)
-    Approval_Date = db.Column(db.DateTime, nullable = False)
+    Approval_Date = db.Column(db.DateTime, nullable = True)
 
     def serialize(self):
         return {
