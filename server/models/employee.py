@@ -5,7 +5,7 @@ class Employee(db.Model):
     __tablename__ = 'employees'
 
     # Define your columns
-    Staff_ID = db.Column(db.Integer, primary_key=True)
+    Staff_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     Reporting_Manager = db.Column(db.Integer, db.ForeignKey('employees.Staff_ID'))
     Staff_FName = db.Column(db.String(50), nullable=False) 
     Staff_LName = db.Column(db.String(50), nullable=False) 
