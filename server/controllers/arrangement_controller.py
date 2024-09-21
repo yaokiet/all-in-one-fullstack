@@ -46,7 +46,7 @@ def view_own_arrangements_in_date_range():
     work_arrangements = Arrangement.query.filter_by(Staff_ID=staff_id).filter(
         Arrangement.Arrangement_Date.between(start_date,end_date)
     ).all()
-
+    
     if not work_arrangements:
         return jsonify({
             'message': 'No work arrangements found for this employee',
