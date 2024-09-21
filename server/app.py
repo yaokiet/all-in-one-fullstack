@@ -6,16 +6,17 @@ from flask_migrate import Migrate
 from controllers.user_controller import user_bp
 from controllers.arrangement_controller import arrangements_bp
 from controllers.employee_controller import employee_bp
+from config import DevelopmentConfig, TestingConfig
 
 
 
-def create_app():
+def create_app(config_class = DevelopmentConfig):
     app = Flask(__name__)
     CORS(app)
 
 
     # Set configurations
-    app.config.from_object('config.Config')
+    app.config.from_object(config_class)
 
     # Initialize extensions
     db.init_app(app)
