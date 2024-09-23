@@ -23,14 +23,7 @@ const DayCard = ({ day, workMode, isCurrentMonth, isToday, isWeekend }) => (
     </div>
 );
 
-const ScheduleView = ({ schedule, workMode, currentDate, viewMode, navigate, returnToCurrent, setViewMode }) => {
-    const formatDateRange = (start, end) => {
-        const options = { month: 'short', day: 'numeric', year: 'numeric' };
-        const startStr = start.toLocaleDateString('en-US', options);
-        const endStr = end.toLocaleDateString('en-US', options);
-        return `${startStr} - ${endStr}`;
-    };
-
+const ScheduleView = ({ schedule, workMode, currentDate, viewMode, navigate, returnToCurrent, setViewMode, setCurrentDate }) => {
     const isToday = (date) => {
         const today = new Date();
         return date.getDate() === today.getDate() &&
@@ -43,6 +36,66 @@ const ScheduleView = ({ schedule, workMode, currentDate, viewMode, navigate, ret
         return day === 0 || day === 6;
     };
 
+    const getWeekStart = (date) => {
+        const d = new Date(date);
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+        return new Date(d.setDate(diff));
+    };
+
+    const formatDateRange = (start, end) => {
+        const startStr = start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const endStr = end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        return `${startStr} - ${endStr}`;
+    };
+
+    const generateWeekOptions = () => {
+        const options = [];
+        const currentYear = currentDate.getFullYear();
+        const startDate = new Date(currentYear - 1, 0, 1);
+        const endDate = new Date(currentYear + 1, 11, 31);
+
+        for (let d = startDate; d <= endDate; d.setDate(d.getDate() + 7)) {
+            const weekStart = getWeekStart(d);
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 6);
+            
+            options.push({
+                value: weekStart.toISOString(),
+                label: formatDateRange(weekStart, weekEnd)
+            });
+        }
+        return options;
+    };
+
+    const generateMonthOptions = () => {
+        const options = [];
+        const currentYear = currentDate.getFullYear();
+        for (let year = currentYear - 1; year <= currentYear + 1; year++) {
+            for (let month = 0; month < 12; month++) {
+                const date = new Date(year, month, 1);
+                options.push({
+                    value: date.toISOString(),
+                    label: date.toLocaleString('default', { month: 'long', year: 'numeric' })
+                });
+            }
+        }
+        return options;
+    };
+
+    const handleDateChange = (e) => {
+        const newDate = new Date(e.target.value);
+        setCurrentDate(newDate);
+    };
+
+    const getDropdownValue = () => {
+        if (viewMode === 'week') {
+            return getWeekStart(currentDate).toISOString();
+        } else {
+            return new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).toISOString();
+        }
+    };
+
     return (
         <div>
             <div className="flex justify-between items-center mb-4">
@@ -53,12 +106,20 @@ const ScheduleView = ({ schedule, workMode, currentDate, viewMode, navigate, ret
                     <ChevronLeft className="h-5 w-5" />
                 </button>
                 <div className="flex items-center space-x-4">
-                    <h2 className="text-xl font-bold">
+                    <select
+                        value={getDropdownValue()}
+                        onChange={handleDateChange}
+                        className="p-2 border rounded"
+                    >
                         {viewMode === 'week' 
-                            ? (schedule.length > 0 && formatDateRange(schedule[0], schedule[6]))
-                            : currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })
+                            ? generateWeekOptions().map(option => (
+                                <option key={option.value} value={option.value}>{option.label}</option>
+                              ))
+                            : generateMonthOptions().map(option => (
+                                <option key={option.value} value={option.value}>{option.label}</option>
+                              ))
                         }
-                    </h2>
+                    </select>
                     <button
                         onClick={returnToCurrent}
                         className="p-2 bg-green-500 text-white rounded hover:bg-green-600 flex items-center"
@@ -99,6 +160,14 @@ const ScheduleView = ({ schedule, workMode, currentDate, viewMode, navigate, ret
 };
 
 export default function OwnSchedule() {
+    const getWeekStart = (date) => {
+        const d = new Date(date);
+        d.setHours(0, 0, 0, 0);
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+        return new Date(d.setDate(diff));
+    };
+
     const [schedule, setSchedule] = useState([]);
     const [workMode, setWorkMode] = useState({
         Monday: "Office",
@@ -114,7 +183,7 @@ export default function OwnSchedule() {
     });
 
     const [activeNav, setActiveNav] = useState('View own schedule');
-    const [currentDate, setCurrentDate] = useState(new Date());
+    const [currentDate, setCurrentDate] = useState(() => getWeekStart(new Date()));
     const [viewMode, setViewMode] = useState('week');
 
     const generateSchedule = (date, mode) => {
@@ -122,15 +191,14 @@ export default function OwnSchedule() {
         let startDate = new Date(date);
 
         if (mode === 'week') {
-            const dayOfWeek = startDate.getDay();
-            startDate.setDate(startDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1));
+            startDate = getWeekStart(startDate);
             for (let i = 0; i < 7; i++) {
                 const day = new Date(startDate);
                 day.setDate(startDate.getDate() + i);
                 days.push(day);
             }
         } else if (mode === 'month') {
-            startDate.setDate(1);
+            startDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
             const monthStart = new Date(startDate);
             const monthEnd = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
             
@@ -160,21 +228,29 @@ export default function OwnSchedule() {
     };
 
     useEffect(() => {
+        console.log("Current Date:", currentDate);
         generateSchedule(currentDate, viewMode);
     }, [currentDate, viewMode]);
 
     const navigate = (direction) => {
-        const newDate = new Date(currentDate);
-        if (viewMode === 'week') {
-            newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
-        } else {
-            newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
-        }
-        setCurrentDate(newDate);
+        setCurrentDate(prevDate => {
+            const newDate = new Date(prevDate);
+            if (viewMode === 'week') {
+                newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
+            } else {
+                newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
+            }
+            return newDate;
+        });
     };
 
     const returnToCurrent = () => {
-        setCurrentDate(new Date());
+        const today = new Date();
+        if (viewMode === 'week') {
+            setCurrentDate(getWeekStart(today));
+        } else {
+            setCurrentDate(new Date(today.getFullYear(), today.getMonth(), 1));
+        }
     };
 
     return (
@@ -192,6 +268,7 @@ export default function OwnSchedule() {
                             navigate={navigate}
                             returnToCurrent={returnToCurrent}
                             setViewMode={setViewMode}
+                            setCurrentDate={setCurrentDate}
                         />
                     )}
                     {activeNav === 'Apply for WFH' && (
