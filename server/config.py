@@ -12,12 +12,13 @@ class Config:
     """Base config."""
     SECRET_KEY = os.getenv('SECRET_KEY', 'default_secret_key')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    PERMANENT_SESSION_LIFETIME = 1800
     DEBUG = False
 
 
 class DevelopmentConfig(Config):
     """Development config."""
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///dev.db')
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     DEBUG = True
 
 class TestingConfig(Config):
