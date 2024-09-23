@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, abort
+from flask import Blueprint, jsonify, request, abort, session
 from extensions import db
 from models.employee import Employee
 
@@ -46,11 +46,24 @@ def login():
                 'code': 400, 
                 'message':"Employee not found"
                 })
+        
+        session['employee_email'] = employee.Email  
+        session['employee_id'] = employee.Staff_ID
+        session['role'] = employee.Role
+        session['logged_in'] = True  
+        session.permanent = True 
+
 
         return jsonify({
             'message': 'Login successful',
             'code' : 200,
-            'employee': employee.serialize()  
+            'employee': employee.serialize(),
+            'session': {
+                'role': session['role'],
+                'employee_email': session['employee_email'],
+                'employee_id': session['employee_id'],
+                'logged_in': session['logged_in'],
+            }  
         })
 
     except Exception as e:
@@ -64,6 +77,65 @@ def login():
         "message": "Invalid JSON input: " + str(request.get_data())
     }), 400
 
+@employee_bp.route('/logout', methods=['POST'])
+def logout():
+    try:
+        # Clear the session
+        session.clear()  # This removes all session data, effectively logging the user out
+
+        return jsonify({
+            'code': 200, 
+            'message': 'Logged out successfully'
+        })
+
+    except Exception as e:
+        # Handle any potential exceptions
+        return jsonify({
+            'code': 500, 
+            'message': str(e)
+        })
+
+    # If the request fails validation or any other unknown error occurs
+    return jsonify({
+        "code": 400,
+        "message": "Invalid JSON input: " + str(request.get_data())
+    }), 400
+
+@employee_bp.route('/auth', methods=['GET'])
+def checkAuth():
+    try:
+        # Check if the user is logged in by checking the session
+        if 'logged_in' in session and session['logged_in']:
+            # User is authenticated, return the session info
+            return jsonify({
+                'code': 200,
+                'message': 'User is authenticated',
+                'employee_id': session.get('employee_id'),
+                'employee_email': session.get('employee_email')
+            })
+        else:
+            # No session or user is not logged in
+            return jsonify({
+                'code': 401,
+                'message': 'User is not authenticated'
+            })
+
+    except Exception as e:
+        # Handle any potential exceptions
+        return jsonify({
+            'code': 500, 
+            'message': str(e)
+        })
+
+    # If the request fails validation or any other unknown error occurs
+    return jsonify({
+        'code': 400,
+        'message': 'Bad request'
+    }), 400
+
+
+
+# ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 # Create a new employee. This is for automated testing
 @employee_bp.route('/employees', methods=['POST'])
