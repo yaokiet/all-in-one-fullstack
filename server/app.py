@@ -3,11 +3,11 @@ from flask import Flask
 from flask_cors import CORS
 from extensions import db
 from flask_migrate import Migrate
-from controllers.user_controller import user_bp
+from config import DevelopmentConfig, TestingConfig
+# from controllers.user_controller import user_bp
 from controllers.arrangement_controller import arrangements_bp
 from controllers.employee_controller import employee_bp
-from config import DevelopmentConfig, TestingConfig
-
+from controllers.team_controller import team_bp
 
 
 def create_app(config_class = DevelopmentConfig):
@@ -23,9 +23,10 @@ def create_app(config_class = DevelopmentConfig):
     Migrate(app, db)
 
     # Register Blueprints
-    app.register_blueprint(user_bp)
+    # app.register_blueprint(user_bp)
     app.register_blueprint(arrangements_bp)
     app.register_blueprint(employee_bp)
+    app.register_blueprint(team_bp)
 
     return app
 

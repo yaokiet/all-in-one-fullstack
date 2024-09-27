@@ -60,4 +60,4 @@ def load_csv_data(file_path):
 if __name__ == '__main__':
     with app.app_context():
         # Load data from the CSV file
-        load_csv_data('load/employeenew.csv')
+        load_csv_data('employeenew.csv')
