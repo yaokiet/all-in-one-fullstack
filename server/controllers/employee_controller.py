@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request, abort, session
 from extensions import db
 from models.employee import Employee
+from models.arrangement import Arrangement
 
 employee_bp = Blueprint('employee', __name__)
 
