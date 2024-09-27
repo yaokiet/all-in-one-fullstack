@@ -117,7 +117,7 @@ export default function OwnSchedule() {
                     const data = await response.json();
                     console.log('Work Arrangements:', data);
                     setWorkArrangements(data);
-                    updateWorkModeandStatus(data); // Update work mode with the fetched data
+                    updateWorkModeandStatus(data);
                 } catch (err) {
                     console.error('Error fetching work arrangements:', err.message);
                     setError(err.message);
@@ -160,7 +160,7 @@ export default function OwnSchedule() {
                     {activeNav === 'View own schedule' && (
                         <ScheduleView 
                             schedule={schedule}
-                            workMode={workModeByDate} // Pass workMode mapped by date
+                            workMode={workModeByDate}
                             currentDate={currentDate}
                             viewMode={viewMode}
                             navigate={navigate}

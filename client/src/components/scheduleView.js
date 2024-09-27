@@ -67,7 +67,7 @@ const ScheduleView = ({ schedule, workMode, currentDate, viewMode, navigate, ret
                     const dayData = workMode[formattedDate];  // Get the work mode and status for this specific date
 
                     // Set default values if no arrangement is found for the date
-                    const dayWorkMode = dayData ? dayData.mode : "In Office";
+                    const dayWorkMode = dayData ? dayData.mode : "Office";
                     const dayStatus = dayData ? dayData.status : "N/A";
 
                     return (
