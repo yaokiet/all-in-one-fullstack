@@ -6,6 +6,13 @@ import Sidebar from '@/components/sidebar';
 import ScheduleView from '@/components/scheduleView';
 
 export default function OwnSchedule() {
+    const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
     const getWeekStart = (date) => {
         const d = new Date(date);
         d.setHours(0, 0, 0, 0);
@@ -14,26 +21,25 @@ export default function OwnSchedule() {
         return new Date(d.setDate(diff));
     };
 
-    const [schedule, setSchedule] = useState([]);  // Store schedule here
+    const [schedule, setSchedule] = useState([]);  
     const [workArrangements, setWorkArrangements] = useState([]);
-    const [workModeByDate, setWorkModeByDate] = useState({}); // Store work mode by date
+    const [workModeByDate, setWorkModeByDate] = useState({});
     const [user, setUser] = useState({
         name: "John Doe",
         userid: 210045,
         role: "Software Developer"
     });
-
     const [activeNav, setActiveNav] = useState('View own schedule');
     const [currentDate, setCurrentDate] = useState(() => getWeekStart(new Date()));
     const [viewMode, setViewMode] = useState('week');
     const [error, setError] = useState(null);
 
-    const formatDate = (date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    };
+    // WFH application form state
+    const [wfhForm, setWfhForm] = useState({
+        reason: '',
+        date: formatDate(new Date()), // Default to today
+        duration: ''
+    });
 
     const generateSchedule = (date, mode) => {
         const days = [];
@@ -73,22 +79,19 @@ export default function OwnSchedule() {
         setSchedule(days);
     };
 
-    // Update work mode based on work arrangements from the API
     const updateWorkModeandStatus = (arrangements) => {
-        const newWorkModeByDate = {}; // Create a new object to store work modes by date
+        const newWorkModeByDate = {};
 
         arrangements.forEach((arrangement) => {
-            const arrangementDate = formatDate(new Date(arrangement.arrangement_date)); // Get the date as string
+            const arrangementDate = formatDate(new Date(arrangement.arrangement_date));
             newWorkModeByDate[arrangementDate] = {
-              mode: arrangement.arrangement_type, // Store the arrangement type by date
-              status: arrangement.status
+                mode: arrangement.arrangement_type,
+                status: arrangement.status
             }
-            
-
         });
 
-        console.log("Updated Work Mode and Status By Date:", newWorkModeByDate); // Log for debugging
-        setWorkModeByDate(newWorkModeByDate); // Update state with new work modes mapped to dates
+        console.log("Updated Work Mode and Status By Date:", newWorkModeByDate);
+        setWorkModeByDate(newWorkModeByDate);
     };
 
     useEffect(() => {
@@ -151,6 +154,42 @@ export default function OwnSchedule() {
         }
     };
 
+    const handleWfhInputChange = (e) => {
+        const { name, value } = e.target;
+        setWfhForm(prevState => ({
+            ...prevState,
+            [name]: value
+        }));
+    };
+
+    const handleWfhSubmit = async (e) => {
+        e.preventDefault();
+        console.log('Submitting WFH Application:', wfhForm);
+        
+        // Submit the form to your API
+        try {
+            const response = await fetch('http://localhost:5000/wfh-application', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(wfhForm)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error: ${response.statusText}`);
+            }
+
+            const result = await response.json();
+            console.log('Application submitted successfully:', result);
+            alert('Application submitted successfully!');
+            setWfhForm({ reason: '', date: formatDate(new Date()), duration: '' }); // Reset form
+        } catch (err) {
+            console.error('Error submitting application:', err.message);
+            alert('Failed to submit application: ' + err.message);
+        }
+    };
+
     return (
         <div className="flex flex-col h-screen">
             <Navbar user={user} />
@@ -171,8 +210,53 @@ export default function OwnSchedule() {
                     )}
                     {activeNav === 'Apply for WFH' && (
                         <div className="bg-white p-4 rounded shadow">
-                            <h2 className="text-xl font-bold mb-4">Apply for Work From Home</h2>
-                            <p>This feature is not implemented yet. Please check back later.</p>
+                            <h2 className="text-xl font-bold mb-4">WFH Application Form</h2>
+                            <form onSubmit={handleWfhSubmit}>
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-700" htmlFor="date">
+                                        Date
+                                    </label>
+                                    <input
+                                        type="date"
+                                        name="date"
+                                        id="date"
+                                        value={wfhForm.date}
+                                        onChange={handleWfhInputChange}
+                                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                                    />
+                                </div>
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-700" htmlFor="reason">
+                                        Reason
+                                    </label>
+                                    <textarea
+                                        name="reason"
+                                        id="reason"
+                                        rows="3"
+                                        value={wfhForm.reason}
+                                        onChange={handleWfhInputChange}
+                                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                                        required
+                                    />
+                                </div>
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-700" htmlFor="duration">
+                                        Duration (in days)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        name="duration"
+                                        id="duration"
+                                        value={wfhForm.duration}
+                                        onChange={handleWfhInputChange}
+                                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                                        required
+                                    />
+                                </div>
+                                <button type="submit" className="mt-2 bg-blue-500 text-white font-semibold py-2 px-4 rounded">
+                                    Submit
+                                </button>
+                            </form>
                         </div>
                     )}
                 </div>
@@ -180,3 +264,4 @@ export default function OwnSchedule() {
         </div>
     );
 }
+
