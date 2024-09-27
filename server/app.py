@@ -8,6 +8,8 @@ from config import DevelopmentConfig, TestingConfig
 from controllers.arrangement_controller import arrangements_bp
 from controllers.employee_controller import employee_bp
 from controllers.team_controller import team_bp
+from controllers.team_view_controller import team_view_bp
+
 
 
 def create_app(config_class = DevelopmentConfig):
@@ -27,6 +29,8 @@ def create_app(config_class = DevelopmentConfig):
     app.register_blueprint(arrangements_bp)
     app.register_blueprint(employee_bp)
     app.register_blueprint(team_bp)
+    app.register_blueprint(team_view_bp)
+
 
     return app
 

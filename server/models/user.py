@@ -23,3 +23,4 @@ class User(db.Model):
             'Email': self.Email,
             'Role': self.Role,
         }
+
