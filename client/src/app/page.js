@@ -1,27 +1,27 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from '@/components/navbar';
 import Sidebar from '@/components/sidebar';
 import ScheduleView from '@/components/scheduleView';
 
 export default function OwnSchedule() {
-    const formatDate = (date) => {
+    const formatDate = useCallback((date) => {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
-    };
+    }, []);
 
-    const getWeekStart = (date) => {
+    const getWeekStart = useCallback((date) => {
         const d = new Date(date);
         d.setHours(0, 0, 0, 0);
         const day = d.getDay();
         const diff = d.getDate() - day + (day === 0 ? -6 : 1);
         return new Date(d.setDate(diff));
-    };
+    }, []);
 
-    const [schedule, setSchedule] = useState([]);  
+    const [schedule, setSchedule] = useState([]);
     const [workArrangements, setWorkArrangements] = useState([]);
     const [workModeByDate, setWorkModeByDate] = useState({});
     const [user, setUser] = useState({
@@ -33,15 +33,20 @@ export default function OwnSchedule() {
     const [currentDate, setCurrentDate] = useState(() => getWeekStart(new Date()));
     const [viewMode, setViewMode] = useState('week');
     const [error, setError] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     // WFH application form state
     const [wfhForm, setWfhForm] = useState({
         reason: '',
         date: formatDate(new Date()), // Default to today
-        duration: ''
+        duration: '1',
+        recurringWeeks: '1'
     });
+    const [minWFHDate, setMinWFHDate] = useState('');
+    const [maxWFHDate, setMaxWFHDate] = useState('');
+    const [maxRecurringWeeks, setMaxRecurringWeeks] = useState(1);
 
-    const generateSchedule = (date, mode) => {
+    const generateSchedule = useCallback((date, mode) => {
         const days = [];
         let startDate = new Date(date);
 
@@ -64,7 +69,7 @@ export default function OwnSchedule() {
                 days.push(day);
             }
 
-            for (let d = monthStart; d <= monthEnd; d.setDate(d.getDate() + 1)) {
+            for (let d = new Date(monthStart); d <= monthEnd; d.setDate(d.getDate() + 1)) {
                 days.push(new Date(d));
             }
 
@@ -77,9 +82,9 @@ export default function OwnSchedule() {
         }
 
         setSchedule(days);
-    };
+    }, [getWeekStart]);
 
-    const updateWorkModeandStatus = (arrangements) => {
+    const updateWorkModeandStatus = useCallback((arrangements) => {
         const newWorkModeByDate = {};
 
         arrangements.forEach((arrangement) => {
@@ -92,12 +97,28 @@ export default function OwnSchedule() {
 
         console.log("Updated Work Mode and Status By Date:", newWorkModeByDate);
         setWorkModeByDate(newWorkModeByDate);
-    };
+    }, [formatDate]);
+
+    const updateMaxRecurringWeeks = useCallback((selectedDate) => {
+        const start = new Date(selectedDate);
+        const end = new Date(maxWFHDate);
+        let maxWeeks = Math.floor((end - start) / (7 * 24 * 60 * 60 * 1000)) + 1;
+      
+        // Ensure the end date of the recurring period doesn't exceed maxWFHDate
+        const recurringEndDate = new Date(start);
+        recurringEndDate.setDate(recurringEndDate.getDate() + (maxWeeks - 1) * 7);
+      
+        if (recurringEndDate > end) {
+          maxWeeks = maxWeeks - 1;
+        }
+      
+        setMaxRecurringWeeks(Math.max(1, maxWeeks));
+    }, [maxWFHDate]);
 
     useEffect(() => {
         console.log("Generating Schedule for Date:", currentDate);
         generateSchedule(currentDate, viewMode);
-    }, [currentDate, viewMode]);
+    }, [currentDate, viewMode, generateSchedule]);
 
     useEffect(() => {
         if (schedule.length > 0) {
@@ -108,13 +129,15 @@ export default function OwnSchedule() {
             console.log('Fetching work arrangements for:', start_date, 'to', end_date);
 
             const fetchOwnArrangements = async () => {
+                setIsLoading(true);
+                setError(null);
                 try {
                     const response = await fetch(`http://localhost:5000/arrangements?staff_id=${staff_id}&start_date=${start_date}&end_date=${end_date}`, {
                         method: 'GET',
                     });
 
                     if (!response.ok) {
-                        throw new Error(`Error: ${response.statusText}`);
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
 
                     const data = await response.json();
@@ -123,7 +146,16 @@ export default function OwnSchedule() {
                     updateWorkModeandStatus(data);
                 } catch (err) {
                     console.error('Error fetching work arrangements:', err.message);
-                    setError(err.message);
+                    setError(`Failed to fetch work arrangements: ${err.message}`);
+                    // Set default work mode if fetch fails
+                    const defaultWorkMode = {};
+                    schedule.forEach(date => {
+                        const formattedDate = formatDate(date);
+                        defaultWorkMode[formattedDate] = { mode: 'Office', status: 'Default' };
+                    });
+                    setWorkModeByDate(defaultWorkMode);
+                } finally {
+                    setIsLoading(false);
                 }
             };
 
@@ -131,9 +163,21 @@ export default function OwnSchedule() {
         } else {
             console.log("Schedule is empty, waiting for it to populate...");
         }
-    }, [schedule]);
+    }, [schedule, user.userid, formatDate, updateWorkModeandStatus]);
 
-    const navigate = (direction) => {
+    useEffect(() => {
+        const today = new Date();
+        const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, today.getDate());
+        const threeMonthsAhead = new Date(today.getFullYear(), today.getMonth() + 3, today.getDate());
+
+        setMinWFHDate(formatDate(twoMonthsAgo));
+        setMaxWFHDate(formatDate(threeMonthsAhead));
+
+        // Update max recurring weeks when component mounts
+        updateMaxRecurringWeeks(formatDate(today));
+    }, [formatDate, updateMaxRecurringWeeks]);
+
+    const navigate = useCallback((direction) => {
         setCurrentDate(prevDate => {
             const newDate = new Date(prevDate);
             if (viewMode === 'week') {
@@ -143,16 +187,16 @@ export default function OwnSchedule() {
             }
             return newDate;
         });
-    };
+    }, [viewMode]);
 
-    const returnToCurrent = () => {
+    const returnToCurrent = useCallback(() => {
         const today = new Date();
         if (viewMode === 'week') {
             setCurrentDate(getWeekStart(today));
         } else {
             setCurrentDate(new Date(today.getFullYear(), today.getMonth(), 1));
         }
-    };
+    }, [viewMode, getWeekStart]);
 
     const handleWfhInputChange = (e) => {
         const { name, value } = e.target;
@@ -160,13 +204,16 @@ export default function OwnSchedule() {
             ...prevState,
             [name]: value
         }));
+
+        if (name === 'date') {
+            updateMaxRecurringWeeks(value);
+        }
     };
 
     const handleWfhSubmit = async (e) => {
         e.preventDefault();
         console.log('Submitting WFH Application:', wfhForm);
         
-        // Submit the form to your API
         try {
             const response = await fetch('http://localhost:5000/wfh-application', {
                 method: 'POST',
@@ -183,7 +230,7 @@ export default function OwnSchedule() {
             const result = await response.json();
             console.log('Application submitted successfully:', result);
             alert('Application submitted successfully!');
-            setWfhForm({ reason: '', date: formatDate(new Date()), duration: '' }); // Reset form
+            setWfhForm({ reason: '', date: formatDate(new Date()), duration: '1', recurringWeeks: '1' }); // Reset form
         } catch (err) {
             console.error('Error submitting application:', err.message);
             alert('Failed to submit application: ' + err.message);
@@ -196,6 +243,22 @@ export default function OwnSchedule() {
             <div className="flex flex-1 overflow-hidden">
                 <Sidebar activeNav={activeNav} setActiveNav={setActiveNav} />
                 <div className="flex-1 p-4 overflow-auto">
+                    {isLoading && (
+                        <div className="bg-blue-100 text-blue-800 p-4 rounded-md mb-4">
+                            <p>Loading work arrangements...</p>
+                        </div>
+                    )}
+                    {error && (
+                        <div className="bg-red-100 text-red-800 p-4 rounded-md mb-4">
+                            <p>{error}</p>
+                            <button 
+                                onClick={() => generateSchedule(currentDate, viewMode)} 
+                                className="mt-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                            >
+                                Retry
+                            </button>
+                        </div>
+                    )}
                     {activeNav === 'View own schedule' && (
                         <ScheduleView 
                             schedule={schedule}
@@ -214,7 +277,7 @@ export default function OwnSchedule() {
                             <form onSubmit={handleWfhSubmit}>
                                 <div className="mb-4">
                                     <label className="block text-sm font-medium text-gray-700" htmlFor="date">
-                                        Date
+                                        Start Date
                                     </label>
                                     <input
                                         type="date"
@@ -222,22 +285,13 @@ export default function OwnSchedule() {
                                         id="date"
                                         value={wfhForm.date}
                                         onChange={handleWfhInputChange}
+                                        min={minWFHDate}
+                                        max={maxWFHDate}
                                         className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                                     />
-                                </div>
-                                <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700" htmlFor="reason">
-                                        Reason
-                                    </label>
-                                    <textarea
-                                        name="reason"
-                                        id="reason"
-                                        rows="3"
-                                        value={wfhForm.reason}
-                                        onChange={handleWfhInputChange}
-                                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                                        required
-                                    />
+                                    <p className="mt-1 text-sm text-gray-500">
+                                        You can apply for WFH between {minWFHDate} and {maxWFHDate}.
+                                    </p>
                                 </div>
                                 <div className="mb-4">
                                     <label className="block text-sm font-medium text-gray-700" htmlFor="duration">
@@ -248,6 +302,41 @@ export default function OwnSchedule() {
                                         name="duration"
                                         id="duration"
                                         value={wfhForm.duration}
+                                        onChange={handleWfhInputChange}
+                                        min="1"
+                                        max="5"
+                                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                                        required
+                                    />
+                                </div>
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-700" htmlFor="recurringWeeks">
+                                        Recurring Weeks
+                                    </label>
+                                    <input
+                                        type="number"
+                                        name="recurringWeeks"
+                                        id="recurringWeeks"
+                                        value={wfhForm.recurringWeeks}
+                                        onChange={handleWfhInputChange}
+                                        min="1"
+                                        max={maxRecurringWeeks}
+                                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                                        required
+                                    />
+                                    <p className="mt-1 text-sm text-gray-500">
+                                        Maximum recurring weeks: {maxRecurringWeeks}
+                                    </p>
+                                </div>
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-700" htmlFor="reason">
+                                        Reason
+                                    </label>
+                                    <textarea
+                                        name="reason"
+                                        id="reason"
+                                        rows="3"
+                                        value={wfhForm.reason}
                                         onChange={handleWfhInputChange}
                                         className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                                         required
@@ -264,4 +353,3 @@ export default function OwnSchedule() {
         </div>
     );
 }
-
