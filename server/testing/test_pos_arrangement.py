@@ -6,6 +6,10 @@ from models.employee import Employee
 from datetime import date, datetime, timedelta
 from config import TestingConfig
 
+# To ensure pytest can find the app, run 
+# export PYTHONPATH=/Users/joelsng/Documents/GitHub/all-in-one-fullstack/server:$PYTHONPATH
+# ensure that the file path fits your directory
+
 @pytest.fixture
 def client():
     # Set up Flask test client and application context
