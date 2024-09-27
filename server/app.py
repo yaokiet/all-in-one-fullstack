@@ -12,7 +12,7 @@ from controllers.team_controller import team_bp
 
 def create_app(config_class = DevelopmentConfig):
     app = Flask(__name__)
-    CORS(app)
+    CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
 
 
     # Set configurations
