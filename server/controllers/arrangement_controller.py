@@ -55,3 +55,5 @@ def view_own_arrangements_in_date_range():
 
     # Corrected list comprehension
     return jsonify([work_arrangement.serialize() for work_arrangement in work_arrangements])
+
+    
