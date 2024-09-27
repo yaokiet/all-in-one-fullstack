@@ -1,25 +1,131 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import React from "react";
-import Navbar from "../components/navbar";
-import { DatePicker } from "@nextui-org/date-picker";
+import React, { useState, useEffect } from 'react';
+import Navbar from '@/components/navbar';
+import Sidebar from '@/components/sidebar';
+import ScheduleView from '@/components/scheduleView';
 
-export default function Home() {
-  // const ...
-  const [pageState, setPageState] = useState("homepage");
 
-  //useEffect ...
+export default function OwnSchedule() {
+    const getWeekStart = (date) => {
+        const d = new Date(date);
+        d.setHours(0, 0, 0, 0);
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+        return new Date(d.setDate(diff));
+    };
 
-  return (
-    <div className="w-full h-screen border border-gray-200 bg-red-200 flex flex-row">
-      {pageState === "homepage" && <h1 className=" h-10 ">Home Page</h1>}
+    const [schedule, setSchedule] = useState([]);
+    const [workMode, setWorkMode] = useState({
+        Monday: "Office",
+        Tuesday: "Work from Home",
+        Wednesday: "Office",
+        Thursday: "Work from Home",
+        Friday: "Office"
+    });
 
-      <div className="  bg-red-50">
-        <Navbar pageState={pageState} />
+    const [user, setUser] = useState({
+        name: "John Doe",
+        role: "Software Developer"
+    });
 
-        <DatePicker />
-      </div>
-    </div>
-  );
+    const [activeNav, setActiveNav] = useState('View own schedule');
+    const [currentDate, setCurrentDate] = useState(() => getWeekStart(new Date()));
+    const [viewMode, setViewMode] = useState('week');
+
+    const generateSchedule = (date, mode) => {
+        const days = [];
+        let startDate = new Date(date);
+
+        if (mode === 'week') {
+            startDate = getWeekStart(startDate);
+            for (let i = 0; i < 7; i++) {
+                const day = new Date(startDate);
+                day.setDate(startDate.getDate() + i);
+                days.push(day);
+            }
+        } else if (mode === 'month') {
+            startDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+            const monthStart = new Date(startDate);
+            const monthEnd = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
+            
+            // Add days from previous month to start on Monday
+            const startDay = monthStart.getDay();
+            for (let i = (startDay === 0 ? -6 : 1) - startDay; i < 0; i++) {
+                const day = new Date(monthStart);
+                day.setDate(day.getDate() + i);
+                days.push(day);
+            }
+
+            // Add all days of the current month
+            for (let d = monthStart; d <= monthEnd; d.setDate(d.getDate() + 1)) {
+                days.push(new Date(d));
+            }
+
+            // Add days from next month to end on Sunday
+            const endDay = monthEnd.getDay();
+            for (let i = 1; i < (endDay === 6 ? 1 : 7 - endDay); i++) {
+                const day = new Date(monthEnd);
+                day.setDate(day.getDate() + i);
+                days.push(day);
+            }
+        }
+
+        setSchedule(days);
+    };
+
+    useEffect(() => {
+        console.log("Current Date:", currentDate);
+        generateSchedule(currentDate, viewMode);
+    }, [currentDate, viewMode]);
+
+    const navigate = (direction) => {
+        setCurrentDate(prevDate => {
+            const newDate = new Date(prevDate);
+            if (viewMode === 'week') {
+                newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
+            } else {
+                newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
+            }
+            return newDate;
+        });
+    };
+
+    const returnToCurrent = () => {
+        const today = new Date();
+        if (viewMode === 'week') {
+            setCurrentDate(getWeekStart(today));
+        } else {
+            setCurrentDate(new Date(today.getFullYear(), today.getMonth(), 1));
+        }
+    };
+
+    return (
+        <div className="flex flex-col h-screen">
+            <Navbar user={user} />
+            <div className="flex flex-1 overflow-hidden">
+                <Sidebar activeNav={activeNav} setActiveNav={setActiveNav} />
+                <div className="flex-1 p-4 overflow-auto">
+                    {activeNav === 'View own schedule' && (
+                        <ScheduleView 
+                            schedule={schedule}
+                            workMode={workMode}
+                            currentDate={currentDate}
+                            viewMode={viewMode}
+                            navigate={navigate}
+                            returnToCurrent={returnToCurrent}
+                            setViewMode={setViewMode}
+                            setCurrentDate={setCurrentDate}
+                        />
+                    )}
+                    {activeNav === 'Apply for WFH' && (
+                        <div className="bg-white p-4 rounded shadow">
+                            <h2 className="text-xl font-bold mb-4">Apply for Work From Home</h2>
+                            <p>This feature is not implemented yet. Please check back later.</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
 }
