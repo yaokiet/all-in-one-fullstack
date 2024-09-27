@@ -1,4 +1,4 @@
-const DayCard = ({ day, workMode, isCurrentMonth, isToday, isWeekend }) => (
+const DayCard = ({ day, workMode, isCurrentMonth, isToday, isWeekend, status }) => (
   <div
     className={`rounded shadow overflow-hidden ${
       isCurrentMonth ? "" : "opacity-50"
@@ -18,13 +18,24 @@ const DayCard = ({ day, workMode, isCurrentMonth, isToday, isWeekend }) => (
       className={`p-2 ${
         isWeekend
           ? "bg-gray-200 h-full"
-          : workMode === "In Office"
+          : workMode === "Office"
           ? "bg-blue-200 h-full"
           : "bg-green-200 h-full"
       }`}
     >
       <p className="font-medium text-sm">{isWeekend ? "Weekend" : workMode}</p>
     </div>
+    
+    <div className="p-2 text-center">
+      <p
+        className={`text-xs font-semibold ${
+          status === "Pending" ? "text-yellow-500" : "text-green-600"
+        }`}
+      >
+        {status === "N/A" ? "" : `Status: ${status}`}
+      </p>
+    </div>
+    
   </div>
 );
 

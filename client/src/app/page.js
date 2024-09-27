@@ -74,15 +74,20 @@ export default function OwnSchedule() {
     };
 
     // Update work mode based on work arrangements from the API
-    const updateWorkMode = (arrangements) => {
+    const updateWorkModeandStatus = (arrangements) => {
         const newWorkModeByDate = {}; // Create a new object to store work modes by date
 
         arrangements.forEach((arrangement) => {
             const arrangementDate = formatDate(new Date(arrangement.arrangement_date)); // Get the date as string
-            newWorkModeByDate[arrangementDate] = arrangement.arrangement_type; // Store the arrangement type by date
+            newWorkModeByDate[arrangementDate] = {
+              mode: arrangement.arrangement_type, // Store the arrangement type by date
+              status: arrangement.status
+            }
+            
+
         });
 
-        console.log("Updated Work Mode By Date:", newWorkModeByDate); // Log for debugging
+        console.log("Updated Work Mode and Status By Date:", newWorkModeByDate); // Log for debugging
         setWorkModeByDate(newWorkModeByDate); // Update state with new work modes mapped to dates
     };
 
@@ -112,7 +117,7 @@ export default function OwnSchedule() {
                     const data = await response.json();
                     console.log('Work Arrangements:', data);
                     setWorkArrangements(data);
-                    updateWorkMode(data); // Update work mode with the fetched data
+                    updateWorkModeandStatus(data); // Update work mode with the fetched data
                 } catch (err) {
                     console.error('Error fetching work arrangements:', err.message);
                     setError(err.message);
@@ -152,11 +157,6 @@ export default function OwnSchedule() {
             <div className="flex flex-1 overflow-hidden">
                 <Sidebar activeNav={activeNav} setActiveNav={setActiveNav} />
                 <div className="flex-1 p-4 overflow-auto">
-                    {error && (
-                        <div className="bg-red-100 text-red-800 p-4 rounded-md">
-                            <p>Error: {error}</p>
-                        </div>
-                    )}
                     {activeNav === 'View own schedule' && (
                         <ScheduleView 
                             schedule={schedule}
