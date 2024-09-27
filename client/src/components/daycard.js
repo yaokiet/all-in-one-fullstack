@@ -20,7 +20,7 @@ const DayCard = ({ day, workMode, isCurrentMonth, isToday, isWeekend }) => (
           ? "bg-gray-200 h-full"
           : workMode === "In Office"
           ? "bg-blue-200 h-full"
-          : "bg-green-200"
+          : "bg-green-200 h-full"
       }`}
     >
       <p className="font-medium text-sm">{isWeekend ? "Weekend" : workMode}</p>

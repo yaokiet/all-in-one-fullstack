@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/navbar';
@@ -16,17 +16,10 @@ export default function OwnSchedule() {
 
     const [schedule, setSchedule] = useState([]);  // Store schedule here
     const [workArrangements, setWorkArrangements] = useState([]);
-    const [workMode, setWorkMode] = useState({
-        Monday: "NONE",
-        Tuesday: "NONE",
-        Wednesday: "NONE",
-        Thursday: "NONE",
-        Friday: "NONE"
-    });
-
+    const [workModeByDate, setWorkModeByDate] = useState({}); // Store work mode by date
     const [user, setUser] = useState({
         name: "John Doe",
-        userid: "210045",
+        userid: 210045,
         role: "Software Developer"
     });
 
@@ -58,7 +51,6 @@ export default function OwnSchedule() {
             const monthStart = new Date(startDate);
             const monthEnd = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
             
-            // Add days from previous month to start on Monday
             const startDay = monthStart.getDay();
             for (let i = (startDay === 0 ? -6 : 1) - startDay; i < 0; i++) {
                 const day = new Date(monthStart);
@@ -66,12 +58,10 @@ export default function OwnSchedule() {
                 days.push(day);
             }
 
-            // Add all days of the current month
             for (let d = monthStart; d <= monthEnd; d.setDate(d.getDate() + 1)) {
                 days.push(new Date(d));
             }
 
-            // Add days from next month to end on Sunday
             const endDay = monthEnd.getDay();
             for (let i = 1; i < (endDay === 6 ? 1 : 7 - endDay); i++) {
                 const day = new Date(monthEnd);
@@ -80,45 +70,33 @@ export default function OwnSchedule() {
             }
         }
 
-        console.log("Generated Days:", days); // Log the generated days for debugging
-        setSchedule(days); // Save days in schedule state
+        setSchedule(days);
     };
 
     // Update work mode based on work arrangements from the API
     const updateWorkMode = (arrangements) => {
-        const newWorkMode = { ...workMode }; // Clone current workMode
+        const newWorkModeByDate = {}; // Create a new object to store work modes by date
 
         arrangements.forEach((arrangement) => {
-            const arrangementDate = new Date(arrangement.arrangement_date);
-            const dayName = arrangementDate.toLocaleDateString('en-US', { weekday: 'long' }); // Get day of the week (e.g., "Monday")
-
-            // Check if the arrangement corresponds to a day in the workMode
-            if (newWorkMode[dayName]) {
-                // Update the work mode (arrangement type could be "Office", "WFH", etc.)
-                newWorkMode[dayName] = arrangement.arrangement_type;
-            }
+            const arrangementDate = formatDate(new Date(arrangement.arrangement_date)); // Get the date as string
+            newWorkModeByDate[arrangementDate] = arrangement.arrangement_type; // Store the arrangement type by date
         });
 
-        console.log("Updated Work Mode:", newWorkMode); // Log the updated work mode for debugging
-        setWorkMode(newWorkMode); // Update the state with the new workMode
+        console.log("Updated Work Mode By Date:", newWorkModeByDate); // Log for debugging
+        setWorkModeByDate(newWorkModeByDate); // Update state with new work modes mapped to dates
     };
 
     useEffect(() => {
-        // Generate the schedule when currentDate or viewMode changes
         console.log("Generating Schedule for Date:", currentDate);
         generateSchedule(currentDate, viewMode);
     }, [currentDate, viewMode]);
 
     useEffect(() => {
-        // Only proceed if the schedule is populated
         if (schedule.length > 0) {
-            const staff_id = user.userid; // Using dynamic user ID
+            const staff_id = user.userid;
+            const start_date = formatDate(schedule[0]);
+            const end_date = formatDate(schedule[schedule.length - 1]);
 
-            // Use the first day in the schedule as the start date
-            const start_date = formatDate(schedule[0]); // First day of the schedule
-            const end_date = formatDate(schedule[schedule.length - 1]); // Last day of the schedule
-
-            console.log('Day Index 1:', schedule[0]);  // Log the first day
             console.log('Fetching work arrangements for:', start_date, 'to', end_date);
 
             const fetchOwnArrangements = async () => {
@@ -132,10 +110,9 @@ export default function OwnSchedule() {
                     }
 
                     const data = await response.json();
-                    // Log the fetched data and update state
                     console.log('Work Arrangements:', data);
-                    setWorkArrangements(data);  // Update state with fetched data
-                    updateWorkMode(data); // Update work mode based on the data
+                    setWorkArrangements(data);
+                    updateWorkMode(data); // Update work mode with the fetched data
                 } catch (err) {
                     console.error('Error fetching work arrangements:', err.message);
                     setError(err.message);
@@ -146,7 +123,7 @@ export default function OwnSchedule() {
         } else {
             console.log("Schedule is empty, waiting for it to populate...");
         }
-    }, [schedule]); // This useEffect depends on schedule changes
+    }, [schedule]);
 
     const navigate = (direction) => {
         setCurrentDate(prevDate => {
@@ -183,7 +160,7 @@ export default function OwnSchedule() {
                     {activeNav === 'View own schedule' && (
                         <ScheduleView 
                             schedule={schedule}
-                            workMode={workMode}
+                            workMode={workModeByDate} // Pass workMode mapped by date
                             currentDate={currentDate}
                             viewMode={viewMode}
                             navigate={navigate}

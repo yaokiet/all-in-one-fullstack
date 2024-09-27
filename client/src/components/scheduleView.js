@@ -1,7 +1,6 @@
 import DayCard from "./daycard";
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 
-
 const ScheduleView = ({ schedule, workMode, currentDate, viewMode, navigate, returnToCurrent, setViewMode, setCurrentDate }) => {
     const isToday = (date) => {
         const today = new Date();
@@ -20,6 +19,13 @@ const ScheduleView = ({ schedule, workMode, currentDate, viewMode, navigate, ret
         const day = d.getDay();
         const diff = d.getDate() - day + (day === 0 ? -6 : 1);
         return new Date(d.setDate(diff));
+    };
+
+    const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     };
 
     const formatDateRange = (start, end) => {
@@ -123,16 +129,21 @@ const ScheduleView = ({ schedule, workMode, currentDate, viewMode, navigate, ret
                 </button>
             </div>
             <div className="grid grid-cols-7 gap-4">
-                {schedule.map((day) => (
-                    <DayCard
-                        key={day.toISOString()}
-                        day={day}
-                        workMode={workMode[day.toLocaleDateString('en-US', { weekday: 'long' })] || "N/A"}
-                        isCurrentMonth={day.getMonth() === currentDate.getMonth()}
-                        isToday={isToday(day)}
-                        isWeekend={isWeekend(day)}
-                    />
-                ))}
+                {schedule.map((day) => {
+                    const formattedDate = formatDate(day);  // Format the day as a date string
+                    const dayWorkMode = workMode[formattedDate] || "N/A";  // Get the work mode for this specific date
+
+                    return (
+                        <DayCard
+                            key={day.toISOString()}
+                            day={day}
+                            workMode={dayWorkMode}  // Pass the work mode based on the formatted date
+                            isCurrentMonth={day.getMonth() === currentDate.getMonth()}
+                            isToday={isToday(day)}
+                            isWeekend={isWeekend(day)}
+                        />
+                    );
+                })}
             </div>
         </div>
     );
