@@ -1,10 +1,10 @@
 "use client"
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from '@/components/navbar';
 import Sidebar from '@/components/sidebar';
 import ScheduleView from '@/components/scheduleView';
-
+import DayCard from '@/components/daycard';
 
 export default function OwnSchedule() {
     const getWeekStart = (date) => {
@@ -25,7 +25,7 @@ export default function OwnSchedule() {
     });
 
     const [user, setUser] = useState({
-        name: "John Doe",
+        name: "Sam Doe",
         role: "Software Developer"
     });
 
@@ -33,7 +33,7 @@ export default function OwnSchedule() {
     const [currentDate, setCurrentDate] = useState(() => getWeekStart(new Date()));
     const [viewMode, setViewMode] = useState('week');
 
-    const generateSchedule = (date, mode) => {
+    const generateSchedule = useCallback((date, mode) => {
         const days = [];
         let startDate = new Date(date);
 
@@ -58,7 +58,7 @@ export default function OwnSchedule() {
             }
 
             // Add all days of the current month
-            for (let d = monthStart; d <= monthEnd; d.setDate(d.getDate() + 1)) {
+            for (let d = new Date(monthStart); d <= monthEnd; d.setDate(d.getDate() + 1)) {
                 days.push(new Date(d));
             }
 
@@ -72,14 +72,14 @@ export default function OwnSchedule() {
         }
 
         setSchedule(days);
-    };
+    }, [getWeekStart]);
 
     useEffect(() => {
         console.log("Current Date:", currentDate);
         generateSchedule(currentDate, viewMode);
-    }, [currentDate, viewMode]);
+    }, [currentDate, viewMode, generateSchedule]);
 
-    const navigate = (direction) => {
+    const navigate = useCallback((direction) => {
         setCurrentDate(prevDate => {
             const newDate = new Date(prevDate);
             if (viewMode === 'week') {
@@ -89,16 +89,16 @@ export default function OwnSchedule() {
             }
             return newDate;
         });
-    };
+    }, [viewMode]);
 
-    const returnToCurrent = () => {
+    const returnToCurrent = useCallback(() => {
         const today = new Date();
         if (viewMode === 'week') {
             setCurrentDate(getWeekStart(today));
         } else {
             setCurrentDate(new Date(today.getFullYear(), today.getMonth(), 1));
         }
-    };
+    }, [viewMode, getWeekStart]);
 
     return (
         <div className="flex flex-col h-screen">
