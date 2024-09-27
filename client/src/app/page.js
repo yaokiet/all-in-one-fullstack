@@ -248,17 +248,7 @@ export default function OwnSchedule() {
                             <p>Loading work arrangements...</p>
                         </div>
                     )}
-                    {error && (
-                        <div className="bg-red-100 text-red-800 p-4 rounded-md mb-4">
-                            <p>{error}</p>
-                            <button 
-                                onClick={() => generateSchedule(currentDate, viewMode)} 
-                                className="mt-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                            >
-                                Retry
-                            </button>
-                        </div>
-                    )}
+                    
                     {activeNav === 'View own schedule' && (
                         <ScheduleView 
                             schedule={schedule}
