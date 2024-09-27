@@ -18,7 +18,7 @@ const DayCard = ({ day, workMode, isCurrentMonth, isToday, isWeekend }) => (
       className={`p-2 ${
         isWeekend
           ? "bg-gray-200 h-full"
-          : workMode === "Office"
+          : workMode === "In Office"
           ? "bg-blue-200 h-full"
           : "bg-green-200"
       }`}
