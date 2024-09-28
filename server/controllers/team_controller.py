@@ -128,3 +128,5 @@ def delete_team(team_id):
             'code': 500,
             'message': str(e)
         }), 500
+
+# Route to get all members of a team that a certain staff ID belongs to

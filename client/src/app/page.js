@@ -46,9 +46,10 @@ export default function OwnSchedule() {
     const [maxWFHDate, setMaxWFHDate] = useState('');
     const [maxRecurringWeeks, setMaxRecurringWeeks] = useState(1);
 
-    const generateSchedule = useCallback((date, mode) => {
-        const days = [];
-        let startDate = new Date(date);
+  const generateSchedule = useCallback(
+    (date, mode) => {
+      const days = [];
+      let startDate = new Date(date);
 
         if (mode === 'week') {
             startDate = getWeekStart(startDate);
@@ -177,17 +178,22 @@ export default function OwnSchedule() {
         updateMaxRecurringWeeks(formatDate(today));
     }, [formatDate, updateMaxRecurringWeeks]);
 
-    const navigate = useCallback((direction) => {
-        setCurrentDate(prevDate => {
-            const newDate = new Date(prevDate);
-            if (viewMode === 'week') {
-                newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
-            } else {
-                newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
-            }
-            return newDate;
-        });
-    }, [viewMode]);
+  const navigate = useCallback(
+    (direction) => {
+      setCurrentDate((prevDate) => {
+        const newDate = new Date(prevDate);
+        if (viewMode === "week") {
+          newDate.setDate(newDate.getDate() + (direction === "next" ? 7 : -7));
+        } else {
+          newDate.setMonth(
+            newDate.getMonth() + (direction === "next" ? 1 : -1)
+          );
+        }
+        return newDate;
+      });
+    },
+    [viewMode]
+  );
 
     const returnToCurrent = useCallback(() => {
         const today = new Date();
