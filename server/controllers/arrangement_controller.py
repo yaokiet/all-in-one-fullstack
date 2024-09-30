@@ -1,5 +1,5 @@
 from models.employee import Employee  # Import the Employee model if needed
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from models.arrangement import Arrangement
 from datetime import datetime
 from extensions import db
@@ -10,7 +10,7 @@ arrangements_bp = Blueprint('arrangement', __name__)
 # This route is to view one's own working arrangements for a given date range
 @arrangements_bp.route('/arrangements', methods=['GET'])
 def view_own_arrangements_in_date_range():
-    staff_id = request.args.get('staff_id')
+    staff_id = session.get('employee_id')
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
 

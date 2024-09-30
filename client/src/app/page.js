@@ -133,8 +133,9 @@ export default function OwnSchedule() {
                 setIsLoading(true);
                 setError(null);
                 try {
-                    const response = await fetch(`http://localhost:5000/arrangements?staff_id=${staff_id}&start_date=${start_date}&end_date=${end_date}`, {
+                    const response = await fetch(`http://localhost:5000/arrangements?start_date=${start_date}&end_date=${end_date}`, {
                         method: 'GET',
+                        credentials: 'include',
                     });
 
                     if (!response.ok) {
