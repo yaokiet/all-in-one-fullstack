@@ -1,6 +1,6 @@
 "use client"; // Mark this as a Client Component
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation"; // Import useRouter from Next.js
 import { Input, Button } from "@nextui-org/react";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
@@ -9,40 +9,45 @@ import axios from "axios";
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  // const showError = useState(false)
   const [showPassword, setShowPassword] = useState(false); // Track password visibility
   const [message, setMessage] = useState(""); // Used for both success and error messages
   const [messageColor, setMessageColor] = useState(""); // To handle message color
+  const [inputColor, setInputColor] = useState("primary"); // Track input field color
   const router = useRouter(); // Initialize the router hook
-
-  const colorMap = {
-    default: "default",
-    primary: "primary",
-  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await axios.post("http://127.0.0.1:5000/login", {
-        email: username,
-        password: password,
-      });
+      const response = await axios.post(
+        "http://localhost:5000/login",
+        {
+          email: username,
+          password: password,
+        },
+        { withCredentials: true }
+      );
 
       console.log(response.data);
 
       const responseCode = response.data.code;
 
-      if (responseCode == 201) {
-        console.log("SUCCESS", response.data.message);
-        router.push("/");
+      if (responseCode === 200) {
+        // Reset input color and message on successful login
+        setInputColor("primary");
+        setMessage("");
+        router.push("/"); // Redirect to home page
       } else {
-        console.log("FAIL", response.data.message);
+        // Set input color to red and show error message
+        setInputColor("danger");
+        setMessage(response.data.message || "Login failed");
+        setMessageColor("text-red-500"); // Set message text color to red
       }
-
-      console.log("Login successful!");
     } catch (error) {
       console.error("There was an error logging in:", error);
+      setInputColor("error"); // Set input color to red for failed login
+      setMessage("An error occurred while logging in.");
+      setMessageColor("text-red-500");
     }
   };
 
@@ -57,7 +62,7 @@ export default function LoginPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="max-w-xs"
-              color={colorMap.primary}
+              color={inputColor} // Change input color dynamically
             />
             <div className="relative max-w-xs">
               <Input
@@ -65,11 +70,12 @@ export default function LoginPage() {
                 label="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                color={colorMap.primary}
+                color={inputColor} // Change input color dynamically
                 className="w-full"
               />
               <button
                 type="button"
+                onClick={() => setShowPassword(!showPassword)} // Toggle password visibility
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-900"
               >
                 {showPassword ? (

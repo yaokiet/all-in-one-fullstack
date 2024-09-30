@@ -47,11 +47,20 @@ def login():
                 'code': 400, 
                 'message':"Employee not found"
                 })
+
+        if password != "tieguanyin":
+            return jsonify({
+                'code': 400, 
+                'message':"Incorrect password"
+            })
         
         session['employee_email'] = employee.Email  
         session['employee_id'] = employee.Staff_ID
         session['role'] = employee.Role
-        session['logged_in'] = True  
+        session['position'] = employee.Position
+        session['logged_in'] = True
+        session['staff_fname'] = employee.Staff_FName
+        session['staff_lname'] = employee.Staff_LName
         session.permanent = True 
 
 
@@ -102,23 +111,28 @@ def logout():
         "message": "Invalid JSON input: " + str(request.get_data())
     }), 400
 
-@employee_bp.route('/auth', methods=['GET'])
+@employee_bp.route('/auth', methods=['POST'])
 def checkAuth():
     try:
         # Check if the user is logged in by checking the session
-        if 'logged_in' in session and session['logged_in']:
+        if session.get('employee_id'):
             # User is authenticated, return the session info
             return jsonify({
                 'code': 200,
                 'message': 'User is authenticated',
                 'employee_id': session.get('employee_id'),
-                'employee_email': session.get('employee_email')
+                'employee_email': session.get('employee_email'),
+                'role': session.get('role'),
+                'position': session.get('position'),
+                'logged_in': session.get('logged_in'),
+                'staff_fname': session.get('staff_fname'),
+                'staff_lname': session.get('staff_lname'),
             })
         else:
             # No session or user is not logged in
             return jsonify({
                 'code': 401,
-                'message': 'User is not authenticated'
+                'message': 'User is not authenticated',
             })
 
     except Exception as e:
