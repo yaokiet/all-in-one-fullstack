@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import DayCard from "./daycard";
+import DayCard from "../daycard";
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 
 const ScheduleView = ({ schedule, workMode, currentDate, viewMode, navigate, returnToCurrent, setViewMode, setCurrentDate }) => {
