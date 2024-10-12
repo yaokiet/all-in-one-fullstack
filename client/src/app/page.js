@@ -303,14 +303,15 @@ export default function OwnSchedule() {
           )}
           {activeNav === "View own schedule" && (
             <ScheduleView
-              schedule={schedule}
-              workMode={workModeByDate}
-              currentDate={currentDate}
-              viewMode={viewMode}
-              navigate={navigate}
-              returnToCurrent={returnToCurrent}
-              setViewMode={setViewMode}
-              error={error}
+                schedule={schedule}
+                workMode={workModeByDate}
+                currentDate={currentDate}
+                viewMode={viewMode}
+                navigate={navigate}
+                returnToCurrent={returnToCurrent}
+                setViewMode={setViewMode}
+                setCurrentDate={setCurrentDate}  // Add this line
+                error={error}
             />
           )}
           {activeNav === "Apply for WFH" && (
