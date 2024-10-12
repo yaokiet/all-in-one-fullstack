@@ -1,13 +1,14 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from models.employee import Employee
 from models.arrangement import Arrangement
 from datetime import datetime, timedelta
+import requests
 
 # Create a new Blueprint for team view-related routes
 team_view_bp = Blueprint('team_view', __name__)
 
-@team_view_bp.route('/team_arrangements', methods=['GET'])
-def team_arrangements():
+@team_view_bp.route('/team_inoffice_count', methods=['GET'])
+def team_inoffice_count():
     staff_id = request.args.get('staff_id')
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
@@ -93,5 +94,125 @@ def team_arrangements():
             'start_date': start_date.strftime('%Y-%m-%d'),
             'end_date': end_date.strftime('%Y-%m-%d')
         },
-        'team_arrangements': date_counts
+        'team_inoffice_count': date_counts
     }), 200
+
+# Given a staff_id of an employee, return all employees who have the same reporting manager
+@team_view_bp.route('/team_members', methods=['GET'])
+def team_members():
+    staff_id = session.get('employee_id')
+    print(f"Retrieved staff_id from session: {staff_id}")
+    if not staff_id:
+        return jsonify({
+            "error":"staff_id is required"
+        }), 400
+    
+    # fetch employee with the provided staff id
+    employee = Employee.query.filter_by(Staff_ID = staff_id).first()
+    
+    if not employee:
+        return jsonify({
+            "error":"Employee not found"
+        }),404
+        
+    reporting_manager_id = employee.Reporting_Manager
+    
+    if not reporting_manager_id:
+        return jsonify({
+            "error":"This employee does not have a reporting manager"
+        }), 404
+    
+    team_members = Employee.query.filter_by(Reporting_Manager = reporting_manager_id).all()
+    
+    if not team_members:
+        return jsonify({
+            "message":"No team members found for this manager"
+        }), 200
+    
+    result = [member.serialize() for member in team_members]
+    
+    return jsonify({
+        "team_members": result,
+        "team_size":len(result)
+    }),200
+    
+@team_view_bp.route('/view_team_arrangements_in_date_range', methods=['GET'])
+def view_team_arrangements_in_date_range():
+    staff_id = session.get('employee_id')
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    
+    # Step 1: Validate inputs
+    if not staff_id or not start_date or not end_date:
+        return jsonify({
+            'message': 'Staff ID, Start Date, and End Date are required',
+            'code': 400
+        }), 400
+
+    try: 
+        start_date = datetime.strptime(start_date, '%Y-%m-%d')
+        end_date = datetime.strptime(end_date, '%Y-%m-%d')
+    except ValueError:
+        return jsonify({
+            'message': 'Invalid date format. Please use YYYY-MM-DD',
+            'code': 400
+        }), 400
+
+    if start_date > end_date:
+        return jsonify({
+            'message': 'Invalid date range. Start Date cannot be after End Date.',
+            'code': 400
+        }), 400
+
+    # Step 2: Call /team_members API to get the team members
+    team_members_url = f'http://localhost:5000/team_members'
+    session_cookie = request.cookies.get('session')  # Get the session cookie from the original request
+    headers = {'Cookie': f'session={session_cookie}'}  # Set the session cookie in the header
+    team_members_response = requests.get(team_members_url, headers=headers)
+
+    
+    if team_members_response.status_code != 200:
+        return jsonify({
+            'message': 'Failed to retrieve team members',
+            'code': team_members_response.status_code
+        }), team_members_response.status_code
+
+    # Step 3: Parse the response and check structure
+    team_members_data = team_members_response.json()
+    
+    if 'team_members' not in team_members_data or not isinstance(team_members_data['team_members'], list):
+        return jsonify({
+            'message': 'Invalid response structure from team_members API',
+            'code': 500
+        }), 500
+
+    # Step 4: Ensure there are team members
+    team_members = team_members_data['team_members']
+    
+    if not team_members:
+        return jsonify({
+            'message': 'No team members found',
+            'code': 404
+        }), 404
+    # return jsonify(team_members),200
+    
+    # Step 5: Collect work arrangements for each team member and include their info
+    collated_arrangements = []
+    for member in team_members:
+        member_id = member['staff_id']
+        
+        # Fetch the arrangements for each team member
+        arrangements_url = f'http://localhost:5000/arrangements?staff_id={member_id}&start_date={start_date.strftime("%Y-%m-%d")}&end_date={end_date.strftime("%Y-%m-%d")}'
+        arrangements_response = requests.get(arrangements_url)
+
+        if arrangements_response.status_code == 200:
+            arrangements = arrangements_response.json()
+            # Include both employee info and their arrangements in a single dictionary
+            collated_arrangements.append({
+                "employee": member,
+                "arrangements": arrangements
+            })
+
+    # Step 6: Return the collated arrangements
+    return jsonify(collated_arrangements), 200
+
