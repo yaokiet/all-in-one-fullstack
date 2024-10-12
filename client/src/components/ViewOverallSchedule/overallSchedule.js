@@ -12,6 +12,7 @@ export default function OverallView({ currentDate }) {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTeamData, setSelectedTeamData] = useState([]);
   const [allTeamMembers, setAllTeamMembers] = useState([]);
+  const [animationTrigger, setAnimationTrigger] = useState(0);
 
   const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
@@ -32,6 +33,7 @@ export default function OverallView({ currentDate }) {
         const data = await response.json();
         setTeamArrangementsWithCount(data.daily_data);
         setAllTeamMembers(data.team_members);
+        setAnimationTrigger(prev => prev + 1); // Trigger animation
       } catch (error) {
         console.error("Error:", error);
       } finally {
@@ -50,12 +52,18 @@ export default function OverallView({ currentDate }) {
   };
 
   const navigateWeek = (direction) => {
-    const newWeekStart = direction === "next"
-      ? addWeeks(currentWeekStart, 1)
-      : subWeeks(currentWeekStart, 1);
-
-    setCurrentWeekStart(newWeekStart);
-    setCurrentWeekEnd(endOfWeek(newWeekStart, { weekStartsOn: 1 }));
+    if (direction === "current") {
+      const thisWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+      setCurrentWeekStart(thisWeekStart);
+      setCurrentWeekEnd(endOfWeek(thisWeekStart, { weekStartsOn: 1 }));
+    } else {
+      const newWeekStart = direction === "next"
+        ? addWeeks(currentWeekStart, 1)
+        : subWeeks(currentWeekStart, 1);
+  
+      setCurrentWeekStart(newWeekStart);
+      setCurrentWeekEnd(endOfWeek(newWeekStart, { weekStartsOn: 1 }));
+    }
   };
 
   const formatDate = (date, idx) => format(new Date(currentWeekStart.getTime() + idx * 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
@@ -91,11 +99,11 @@ export default function OverallView({ currentDate }) {
 
         {/* Team Schedule Table */}
         <div className="overflow-x-auto">
-          <table className="min-w-full bg-white border">
+          <table className="min-w-full bg-white border table-fixed">
             <thead>
               <tr>
                 {daysOfWeek.map((day) => (
-                  <th key={day} className="px-4 py-2 border text-left">
+                  <th key={day} className="px-4 py-2 border">
                     {day}
                   </th>
                 ))}
@@ -104,7 +112,7 @@ export default function OverallView({ currentDate }) {
             <tbody>
               <tr>
                 {isLoading ? (
-                  <td colSpan={daysOfWeek.length} className="text-center py-4">
+                  <td colSpan={daysOfWeek.length} className="text-center py-12">
                     Loading team schedules...
                   </td>
                 ) : (
@@ -113,12 +121,21 @@ export default function OverallView({ currentDate }) {
                     const dayData = teamArrangementsWithCount?.[date];
 
                     return (
-                      <td key={idx} className="px-4 py-2 border">
-                        <TeamDayCard
-                          dayData={dayData}
-                          date={date}
-                          onClick={() => handleDayClick(date)}
-                        />
+                      <td key={idx} className="px-4 py-6 border">
+                        <div 
+                          className="opacity-0 transform translate-y-4 transition-all duration-500 ease-out"
+                          style={{
+                            animationDelay: `${idx * 50}ms`,
+                            animationFillMode: 'forwards',
+                            animation: `fadeInUp 0.3s ease-out ${idx * 50}ms forwards`
+                          }}
+                        >
+                          <TeamDayCard
+                            dayData={dayData}
+                            date={date}
+                            onClick={() => handleDayClick(date)}
+                          />
+                        </div>
                       </td>
                     );
                   })
@@ -137,6 +154,19 @@ export default function OverallView({ currentDate }) {
         teamData={selectedTeamData}
         allTeamMembers={allTeamMembers}
       />
+
+      <style jsx>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(5px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 }
