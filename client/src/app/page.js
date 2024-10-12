@@ -5,6 +5,7 @@ import Navbar from "@/components/navbar";
 import Sidebar from "@/components/sidebar";
 import ScheduleView from "@/components/OwnSchedule/scheduleView";
 import WFHApplicationForm from "@/components/ApplyforWFH/applyWFH"; // Import the WFH form
+import OverallView from "@/components/ViewOverallSchedule/overallSchedule";
 
 export default function OwnSchedule() {
   const formatDate = useCallback((date) => {
@@ -269,6 +270,26 @@ export default function OwnSchedule() {
     }
   }, [viewMode, getWeekStart]);
 
+  const [teamSchedules, setTeamSchedules] = useState([]);
+  const [isLoadingTeam, setIsLoadingTeam] = useState(false);
+  
+  useEffect(() => {
+    const fetchTeamSchedules = async () => {
+      setIsLoadingTeam(true);
+      try {
+        const response = await fetch(`http://localhost:5000/team-schedule`);
+        const data = await response.json();
+        setTeamSchedules(data);
+      } catch (err) {
+        console.error("Failed to fetch team schedules", err);
+      } finally {
+        setIsLoadingTeam(false);
+      }
+    };
+
+    fetchTeamSchedules();
+  }, []);
+
   return (
     <div className="flex flex-col h-screen">
       <Navbar user={user} />
@@ -303,14 +324,13 @@ export default function OwnSchedule() {
             />
           )}
           {activeNav === "View Overall Schedule" && (
-            // yan jie change this to ur own component, can refer to the other components to know how to pass in props
-            <WFHApplicationForm
-              wfhForm={wfhForm}
-              minWFHDate={minWFHDate}
-              maxWFHDate={maxWFHDate}
-              maxRecurringWeeks={maxRecurringWeeks}
-              handleWfhInputChange={handleWfhInputChange}
-              handleWfhSubmit={handleWfhSubmit}
+            <OverallView
+              teamSchedules={teamSchedules}
+              currentDate={currentDate}
+              viewMode={viewMode}
+              navigate={navigate}
+              returnToCurrent={returnToCurrent}
+              setViewMode={setViewMode}
             />
           )}
         </div>
