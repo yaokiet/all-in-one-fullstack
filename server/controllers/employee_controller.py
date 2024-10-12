@@ -55,6 +55,7 @@ def login():
             })
         
         session['employee_email'] = employee.Email  
+        session['reporting_manager'] = employee.Reporting_Manager
         session['employee_id'] = employee.Staff_ID
         session['role'] = employee.Role
         session['position'] = employee.Position
@@ -127,6 +128,7 @@ def checkAuth():
                 'logged_in': session.get('logged_in'),
                 'staff_fname': session.get('staff_fname'),
                 'staff_lname': session.get('staff_lname'),
+                'reporting_manager': session.get('reporting_manager')
             })
         else:
             # No session or user is not logged in

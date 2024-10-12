@@ -11,6 +11,7 @@ class Arrangement(db.Model):
     Status = db.Column(db.String(20), nullable = False)
     Application_Date = db.Column(db.DateTime, nullable = False)
     Approval_Date = db.Column(db.DateTime, nullable = True)
+    Reason = db.Column(db.String(255), nullable = True)
 
     def serialize(self):
         return {
@@ -21,5 +22,6 @@ class Arrangement(db.Model):
             'arrangement_date' : self.Arrangement_Date.isoformat(),
             'status' : self.Status,
             'application_date' : self.Application_Date.isoformat(),
-            'approval_date' : self.Approval_Date.isoformat() if self.Approval_Date else None
+            'approval_date' : self.Approval_Date.isoformat() if self.Approval_Date else None,
+            'reason' : self.Reason,
         }
