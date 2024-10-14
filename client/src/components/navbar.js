@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 const Navbar = () => {
   const [username, setUsername] = useState("");
   const [role, setRole] = useState("");
-  const [position, setPosition] = useState("")
+  const [position, setPosition] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
@@ -62,8 +62,7 @@ const Navbar = () => {
           setUsername(
             response.data.staff_fname + " " + response.data.staff_lname
           );
-          setPosition(response.data.position)
-          
+          setPosition(response.data.position);
         } else {
           console.log("error with auth", response.data);
           router.push("/authentication");
@@ -80,7 +79,7 @@ const Navbar = () => {
   return (
     <nav className="bg-blue-500 h-20 w-full text-white flex justify-center">
       <div className="mx-auto w-full flex justify-between items-center px-10">
-        <h1 className="text-xl font-bold">Own Schedule</h1>
+        <h1 className="text-xl font-bold">ALLINONE</h1>
         {isAuthenticated && (
           <div className="">
             <button
