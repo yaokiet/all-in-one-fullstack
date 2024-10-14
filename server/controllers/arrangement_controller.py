@@ -4,7 +4,6 @@ from models.arrangement import Arrangement
 from datetime import datetime
 from extensions import db
 
-
 arrangements_bp = Blueprint('arrangement', __name__)
 
 # This route is to view one's own working arrangements for a given date range
