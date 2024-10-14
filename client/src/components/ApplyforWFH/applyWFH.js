@@ -1,85 +1,103 @@
-"use client"
-
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import RequestCard from '@/components/requestCard'
 import ApplyWFHModal from '@/components/ApplyWFHModal'
 
-
-export default function ScheduleManagement() {
+export default function ApplyWFH() {
+  const [requests, setRequests] = useState([])
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('upcoming')
-  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false)
 
-  const handleTabChange = (tab) => {
-    setActiveTab(tab)
+  useEffect(() => {
+    // Simulating fetching data from the backend
+    const fetchRequests = async () => {
+      // Replace this with your actual API call
+      const response = await fetch('/api/requests')
+      const data = await response.json()
+      setRequests(data)
+    }
+
+    fetchRequests()
+  }, [])
+
+  const openModal = () => {
+    setIsModalOpen(true)
   }
 
-  const openApplyModal = () => {
-    setIsApplyModalOpen(true)
+  const closeModal = () => {
+    setIsModalOpen(false)
   }
 
-  const closeApplyModal = () => {
-    setIsApplyModalOpen(false)
+  const handleSubmitRequest = (newRequest) => {
+    // Here you would typically send the new request to your backend
+    // For now, we'll just add it to the local state
+    setRequests([...requests, { ...newRequest, id: Date.now(), status: 'Pending' }])
+    closeModal()
   }
+
+  const filteredRequests = requests.filter(request => {
+    const requestDate = new Date(request.date)
+    const today = new Date()
+    return activeTab === 'upcoming' ? requestDate >= today : requestDate < today
+  })
+
+  // Dummy data for testing
+  const dummyRequests = [
+    {
+      id: 1,
+      type: 'Work From Home',
+      status: 'Pending',
+      date: '2024-10-20',
+      time: 'AM',
+      approvingManager: 'John Doe',
+      recurrence: 'Weekly'
+    },
+    {
+      id: 2,
+      type: 'Work From Home',
+      status: 'Approved',
+      date: '2024-10-25',
+      time: 'FULL',
+      approvingManager: 'Jane Smith',
+      recurrence: 'None'
+    }
+  ]
 
   return (
-    <div className="flex h-screen">
-      
-
-      {/* Main content */}
-      <div className="flex-1">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex space-x-2">
-            <button
-              onClick={() => handleTabChange('upcoming')}
-              className={`px-4 py-2 rounded ${
-                activeTab === 'upcoming' ? 'bg-blue-500 text-white' : 'bg-gray-200'
-              }`}
-            >
-              Upcoming
-            </button>
-            <button
-              onClick={() => handleTabChange('past')}
-              className={`px-4 py-2 rounded ${
-                activeTab === 'past' ? 'bg-blue-500 text-white' : 'bg-gray-200'
-              }`}
-            >
-              Past
-            </button>
-          </div>
-          <button
-            onClick={openApplyModal}
-            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-          >
-            Apply+
-          </button>
-        </div>
-
-        <table className="min-w-full bg-white">
-          <thead>
-            <tr>
-              <th className="py-2 px-4 border-b">Date</th>
-              <th className="py-2 px-4 border-b">Manager Name</th>
-              <th className="py-2 px-4 border-b">Status</th>
-              <th className="py-2 px-4 border-b">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* Sample data - replace with actual data */}
-            <tr>
-              <td className="py-2 px-4 border-b">2023-05-15</td>
-              <td className="py-2 px-4 border-b">John Doe</td>
-              <td className="py-2 px-4 border-b">Approved</td>
-              <td className="py-2 px-4 border-b">
-                <button className="text-blue-500 hover:text-blue-700 mr-2">Change</button>
-                <button className="text-red-500 hover:text-red-700">Withdraw</button>
-              </td>
-            </tr>
-            {/* Add more rows as needed */}
-          </tbody>
-        </table>
+    <div className="container mx-auto p-4">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Work From Home Requests</h1>
+        <button
+          type="button"
+          onClick={openModal}
+          className="inline-flex justify-center rounded-md border border-transparent bg-[#6C7BF2] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#5A68D2] focus:outline-none focus:ring-2 focus:ring-[#6C7BF2] focus:ring-offset-2"
+        >
+          New Request
+        </button>
       </div>
-
-      {/* Apply WFH Modal */}
-      <ApplyWFHModal isOpen={isApplyModalOpen} onClose={closeApplyModal} />
+      <div className="flex mb-4">
+        <button
+          className={`px-4 py-2 mr-2 rounded-md ${activeTab === 'upcoming' ? 'bg-[#6C7BF2] text-white' : 'bg-gray-200 text-gray-700'}`}
+          onClick={() => setActiveTab('upcoming')}
+        >
+          Upcoming
+        </button>
+        <button
+          className={`px-4 py-2 rounded-md ${activeTab === 'past' ? 'bg-[#6C7BF2] text-white' : 'bg-gray-200 text-gray-700'}`}
+          onClick={() => setActiveTab('past')}
+        >
+          Past
+        </button>
+      </div>
+      <div className="space-y-6">
+        {dummyRequests.map((request) => (
+          <RequestCard key={request.id} request={request} />
+        ))}
+      </div>
+      <ApplyWFHModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        onSubmit={handleSubmitRequest}
+      />
     </div>
   )
 }
