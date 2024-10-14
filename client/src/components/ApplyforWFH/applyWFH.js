@@ -1,149 +1,85 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
-import { Calendar } from "@/components/calendar"
+import React, { useState } from 'react'
+import ApplyWFHModal from '@/components/ApplyWFHModal'
 
-export default function ApplyWFH() {
-  const [selectedDates, setSelectedDates] = useState([])
-  const [arrangement, setArrangement] = useState('Work from Home')
-  const [session, setSession] = useState('AM')
-  const [recurring, setRecurring] = useState('None')
-  const [recurrenceCount, setRecurrenceCount] = useState(1)
-  const [maxRecurrenceCount, setMaxRecurrenceCount] = useState(12)
-  const [reason, setReason] = useState('')
-  const [dateRange, setDateRange] = useState({ start: new Date(), end: new Date() })
 
-  useEffect(() => {
-    const currentDate = new Date()
-    const twoMonthsAgo = new Date(currentDate.getFullYear(), currentDate.getMonth() - 2, currentDate.getDate())
-    const threeMonthsLater = new Date(currentDate.getFullYear(), currentDate.getMonth() + 3, currentDate.getDate())
-    const weeksBetween = Math.floor((threeMonthsLater.getTime() - currentDate.getTime()) / (7 * 24 * 60 * 60 * 1000))
-    setMaxRecurrenceCount(weeksBetween)
-    setDateRange({ start: twoMonthsAgo, end: threeMonthsLater })
-  }, [])
+export default function ScheduleManagement() {
+  const [activeTab, setActiveTab] = useState('upcoming')
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false)
 
-  const handleDateSelect = (dates) => {
-    setSelectedDates(dates || [])
+  const handleTabChange = (tab) => {
+    setActiveTab(tab)
   }
 
-  const clearSelectedDates = () => {
-    setSelectedDates([])
+  const openApplyModal = () => {
+    setIsApplyModalOpen(true)
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log('Submitting:', { selectedDates, arrangement, session, recurring, recurrenceCount, reason })
-    // Add your submission logic here
-  }
-
-  const isDateDisabled = (date) => {
-    return date < dateRange.start || date > dateRange.end
+  const closeApplyModal = () => {
+    setIsApplyModalOpen(false)
   }
 
   return (
-    <div className="max-w-md mx-auto mt-10">
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block mb-2 text-sm font-medium text-gray-700">Select Dates</label>
-          <Calendar
-            mode="multiple"
-            selected={selectedDates}
-            onSelect={handleDateSelect}
-            disabled={isDateDisabled}
-            className="rounded-md border"
-          />
-          <button
-            type="button"
-            onClick={clearSelectedDates}
-            className="mt-2 w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Clear Selected Dates
-          </button>
-          <p className="mt-2 text-sm text-gray-600">
-            Selected dates: {selectedDates.map(date => date.toDateString()).join(", ")}
-          </p>
-          <p className="mt-1 text-sm text-gray-500">
-            You can select dates from {dateRange.start.toDateString()} to {dateRange.end.toDateString()}
-          </p>
-        </div>
+    <div className="flex h-screen">
+      
 
-        <div>
-          <label htmlFor="arrangement" className="block text-sm font-medium text-gray-700">Arrangement</label>
-          <select
-            id="arrangement"
-            value={arrangement}
-            onChange={(e) => setArrangement(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-          >
-            <option>Work from Home</option>
-            <option>Office</option>
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="session" className="block text-sm font-medium text-gray-700">Session</label>
-          <select
-            id="session"
-            value={session}
-            onChange={(e) => setSession(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-          >
-            <option>AM</option>
-            <option>PM</option>
-            <option>Full Day</option>
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="recurring" className="block text-sm font-medium text-gray-700">Recurring</label>
-          <select
-            id="recurring"
-            value={recurring}
-            onChange={(e) => setRecurring(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-          >
-            <option>None</option>
-            <option>Weekly</option>
-            <option>Bi-weekly</option>
-            <option>Monthly</option>
-          </select>
-        </div>
-
-        {recurring !== 'None' && (
-          <div>
-            <label htmlFor="recurrenceCount" className="block text-sm font-medium text-gray-700">Number of Recurrences</label>
-            <input
-              type="number"
-              id="recurrenceCount"
-              value={recurrenceCount}
-              onChange={(e) => setRecurrenceCount(Math.min(Math.max(1, parseInt(e.target.value) || 1), maxRecurrenceCount))}
-              min="1"
-              max={maxRecurrenceCount}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-            />
-            <p className="mt-1 text-sm text-gray-500">Maximum recurrences: {maxRecurrenceCount}</p>
+      {/* Main content */}
+      <div className="flex-1">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex space-x-2">
+            <button
+              onClick={() => handleTabChange('upcoming')}
+              className={`px-4 py-2 rounded ${
+                activeTab === 'upcoming' ? 'bg-blue-500 text-white' : 'bg-gray-200'
+              }`}
+            >
+              Upcoming
+            </button>
+            <button
+              onClick={() => handleTabChange('past')}
+              className={`px-4 py-2 rounded ${
+                activeTab === 'past' ? 'bg-blue-500 text-white' : 'bg-gray-200'
+              }`}
+            >
+              Past
+            </button>
           </div>
-        )}
-
-        <div>
-          <label htmlFor="reason" className="block text-sm font-medium text-gray-700">Reason</label>
-          <textarea
-            id="reason"
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            rows={3}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-            placeholder="Enter reason for the arrangement request"
-          />
+          <button
+            onClick={openApplyModal}
+            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+          >
+            Apply+
+          </button>
         </div>
 
-        <button
-          type="submit"
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          Submit Request
-        </button>
-      </form>
+        <table className="min-w-full bg-white">
+          <thead>
+            <tr>
+              <th className="py-2 px-4 border-b">Date</th>
+              <th className="py-2 px-4 border-b">Manager Name</th>
+              <th className="py-2 px-4 border-b">Status</th>
+              <th className="py-2 px-4 border-b">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {/* Sample data - replace with actual data */}
+            <tr>
+              <td className="py-2 px-4 border-b">2023-05-15</td>
+              <td className="py-2 px-4 border-b">John Doe</td>
+              <td className="py-2 px-4 border-b">Approved</td>
+              <td className="py-2 px-4 border-b">
+                <button className="text-blue-500 hover:text-blue-700 mr-2">Change</button>
+                <button className="text-red-500 hover:text-red-700">Withdraw</button>
+              </td>
+            </tr>
+            {/* Add more rows as needed */}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Apply WFH Modal */}
+      <ApplyWFHModal isOpen={isApplyModalOpen} onClose={closeApplyModal} />
     </div>
   )
 }
