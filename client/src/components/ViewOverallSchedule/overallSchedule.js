@@ -9,7 +9,7 @@ export default function OverallView({
   setViewMode,
 }) {
   const [selectedTeamMember, setSelectedTeamMember] = useState("");
-  const [filteredSchedule, setFilteredSchedule] = useState([]);
+  const [filteredSchedule, seatFilteredSchedule] = useState([]);
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(currentDate, { weekStartsOn: 1 })); // Monday as start of the week
   const [currentWeekEnd, setCurrentWeekEnd] = useState(endOfWeek(currentDate, { weekStartsOn: 1 }));
 
