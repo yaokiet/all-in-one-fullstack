@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { format, addWeeks, subWeeks, startOfWeek, endOfWeek } from "date-fns";
 import TeamDayCard from "../teamdaycard";
-import TeamOverview from "../teamoverview";
+import TeamOverview from "./teamoverview";
 
 export default function OverallView({ currentDate }) {
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(currentDate, { weekStartsOn: 1 }));

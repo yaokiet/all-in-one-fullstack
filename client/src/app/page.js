@@ -32,6 +32,8 @@ export default function OwnSchedule() {
     role: "Software Developer",
   });
   const [activeNav, setActiveNav] = useState("View own schedule");
+
+
   const [currentDate, setCurrentDate] = useState(() =>
     getWeekStart(new Date())
   );
@@ -164,7 +166,7 @@ export default function OwnSchedule() {
 
   useEffect(() => {
     if (activeNav !== "View own schedule") return;
-    if (activeNav === "View own schedule"){
+    if (activeNav === "View own schedule") {
       generateSchedule(currentDate, viewMode);
     }
   }, [currentDate, viewMode, generateSchedule, activeNav]);
@@ -173,13 +175,13 @@ export default function OwnSchedule() {
     if (activeNav !== "View own schedule" || schedule.length === 0) return;
     if (activeNav === "View own schedule" && schedule.length > 0) {
       const fetchOwnArrangements = async () => {
-        setIsLoading(true);  // Only set loading state when needed
-        setError(null);      // Reset error state on fetch start
-  
+        setIsLoading(true); // Only set loading state when needed
+        setError(null); // Reset error state on fetch start
+
         try {
           const start_date = formatDate(schedule[0]);
           const end_date = formatDate(schedule[schedule.length - 1]);
-  
+
           const response = await fetch(
             `http://localhost:5000/arrangements?start_date=${start_date}&end_date=${end_date}`,
             {
@@ -187,18 +189,18 @@ export default function OwnSchedule() {
               credentials: "include",
             }
           );
-  
+
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
-  
+
           const data = await response.json();
-          setWorkArrangements(data);  // Update only if data is fetched
-          updateWorkModeandStatus(data);  // Update work mode status based on data
+          setWorkArrangements(data); // Update only if data is fetched
+          updateWorkModeandStatus(data); // Update work mode status based on data
         } catch (err) {
           console.error("Error fetching work arrangements:", err.message);
           setError(`Failed to fetch work arrangements: ${err.message}`);
-          
+
           // Fallback to default state in case of fetch failure
           const defaultWorkMode = {};
           schedule.forEach((date) => {
@@ -210,15 +212,14 @@ export default function OwnSchedule() {
           });
           setWorkModeByDate(defaultWorkMode);
         } finally {
-          setIsLoading(false);  // Stop loading once fetch is done
+          setIsLoading(false); // Stop loading once fetch is done
         }
       };
-  
+
       fetchOwnArrangements();
     } else {
     }
   }, [schedule, user.userid, formatDate, updateWorkModeandStatus, activeNav]);
-  
 
   useEffect(() => {
     const today = new Date();
@@ -277,7 +278,7 @@ export default function OwnSchedule() {
               <p>Loading work arrangements...</p>
             </div>
           )}
-  
+
           {activeNav === "View own schedule" && (
             <ScheduleView
               schedule={schedule}
@@ -291,7 +292,7 @@ export default function OwnSchedule() {
               error={error}
             />
           )}
-  
+
           {activeNav === "Apply for WFH" && (
             <WFHApplicationForm
               wfhForm={wfhForm}
@@ -302,7 +303,7 @@ export default function OwnSchedule() {
               handleWfhSubmit={handleWfhSubmit}
             />
           )}
-  
+
           {activeNav === "View Overall Schedule" && (
             <OverallView
               currentDate={currentDate}
@@ -316,5 +317,4 @@ export default function OwnSchedule() {
       </div>
     </div>
   );
-  
 }

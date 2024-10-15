@@ -112,6 +112,7 @@ const Navbar = () => {
         onConfirm={confirmLogout}
         title="Confirm Logout"
         message="Are you sure you want to log out?"
+        buttonMessage={"Logout"}
       />
     </nav>
   );

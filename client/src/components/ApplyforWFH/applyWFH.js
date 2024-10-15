@@ -1,71 +1,56 @@
-import React, { useState, useEffect } from 'react'
-import RequestCard from '@/components/requestCard'
-import ApplyWFHModal from '@/components/ApplyWFHModal'
+import React, { useState, useEffect } from "react";
+import RequestCard from "@/components/requestCard";
+import ApplyWFHModal from "@/components/ApplyWFHModal";
 
 export default function ApplyWFH() {
-  const [requests, setRequests] = useState([])
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState('upcoming')
+  const [requests, setRequests] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("upcoming");
+  const [superviserName, setSuperviserName] = useState("");
+  const [deleteSignal, setDeleteSignal] = useState(false);
 
   useEffect(() => {
-    // Simulating fetching data from the backend
+    // Fetch data from the backend based on activeTab
     const fetchRequests = async () => {
-      // Replace this with your actual API call
-      const response = await fetch('/api/requests')
-      const data = await response.json()
-      setRequests(data)
-    }
+      try {
+        const response = await fetch(
+          `http://localhost:5000/apply?filter=${activeTab}`,
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
 
-    fetchRequests()
-  }, [])
+        const data = await response.json();
+
+        if (response.ok) {
+          setRequests(data.arrangements);
+          setSuperviserName(data.manager_name);
+          console.log(data);
+        } else {
+          console.error("Failed to fetch data:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchRequests();
+    setDeleteSignal(false);
+  }, [activeTab, deleteSignal]); // Fetches data whenever the tab changes
 
   const openModal = () => {
-    setIsModalOpen(true)
-  }
+    setIsModalOpen(true);
+  };
 
   const closeModal = () => {
-    setIsModalOpen(false)
-  }
-
-  const handleSubmitRequest = (newRequest) => {
-    // Here you would typically send the new request to your backend
-    // For now, we'll just add it to the local state
-    setRequests([...requests, { ...newRequest, id: Date.now(), status: 'Pending' }])
-    closeModal()
-  }
-
-  const filteredRequests = requests.filter(request => {
-    const requestDate = new Date(request.date)
-    const today = new Date()
-    return activeTab === 'upcoming' ? requestDate >= today : requestDate < today
-  })
-
-  // Dummy data for testing
-  const dummyRequests = [
-    {
-      id: 1,
-      type: 'Work From Home',
-      status: 'Pending',
-      date: '2024-10-20',
-      time: 'AM',
-      approvingManager: 'John Doe',
-      recurrence: 'Weekly'
-    },
-    {
-      id: 2,
-      type: 'Work From Home',
-      status: 'Approved',
-      date: '2024-10-25',
-      time: 'FULL',
-      approvingManager: 'Jane Smith',
-      recurrence: 'None'
-    }
-  ]
+    setIsModalOpen(false);
+  };
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="bg-gray-100 rounded-lg shadow-md container mx-auto p-5">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Work From Home Requests</h1>
+        <h1 className="text-xl font-bold">Work From Home Requests</h1>
         <button
           type="button"
           onClick={openModal}
@@ -76,28 +61,37 @@ export default function ApplyWFH() {
       </div>
       <div className="flex mb-4">
         <button
-          className={`px-4 py-2 mr-2 rounded-md ${activeTab === 'upcoming' ? 'bg-[#6C7BF2] text-white' : 'bg-gray-200 text-gray-700'}`}
-          onClick={() => setActiveTab('upcoming')}
+          className={`px-4 py-2 mr-2 rounded-md ${
+            activeTab === "upcoming"
+              ? "bg-[#6C7BF2] text-white"
+              : "bg-gray-200 text-gray-700"
+          }`}
+          onClick={() => setActiveTab("upcoming")}
         >
           Upcoming
         </button>
         <button
-          className={`px-4 py-2 rounded-md ${activeTab === 'past' ? 'bg-[#6C7BF2] text-white' : 'bg-gray-200 text-gray-700'}`}
-          onClick={() => setActiveTab('past')}
+          className={`px-4 py-2 rounded-md ${
+            activeTab === "past"
+              ? "bg-[#6C7BF2] text-white"
+              : "bg-gray-200 text-gray-700"
+          }`}
+          onClick={() => setActiveTab("past")}
         >
           Past
         </button>
       </div>
       <div className="space-y-6">
-        {dummyRequests.map((request) => (
-          <RequestCard key={request.id} request={request} />
+        {requests.map((request) => (
+          <RequestCard
+            key={request.id}
+            request={request}
+            superviserName={superviserName}
+            setDeleteSignal={setDeleteSignal}
+          />
         ))}
       </div>
-      <ApplyWFHModal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        onSubmit={handleSubmitRequest}
-      />
+      <ApplyWFHModal isOpen={isModalOpen} onClose={closeModal} />
     </div>
-  )
+  );
 }

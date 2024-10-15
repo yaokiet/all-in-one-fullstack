@@ -17,14 +17,13 @@ def get_arrangements():
         filter_type = request.args.get('filter')
         current_date = datetime.now().date()
 
+        # Filter arrangements based on 'upcoming' or 'past'
         if filter_type == 'upcoming':
-            # Get upcoming arrangements (after the current date)
             arrangements = Arrangement.query.filter(
                 Arrangement.Staff_ID == staff_id,
                 Arrangement.Arrangement_Date >= current_date
             ).all()
         elif filter_type == 'past':
-            # Get past arrangements (before the current date)
             arrangements = Arrangement.query.filter(
                 Arrangement.Staff_ID == staff_id,
                 Arrangement.Arrangement_Date < current_date
@@ -32,13 +31,21 @@ def get_arrangements():
         else:
             return jsonify({'code': 400, 'message': 'Invalid filter type. Use "upcoming" or "past".'}), 400
 
+        # Get the employee's first and last name
+        manager = Employee.query.get(session.get('reporting_manager'))
+        if not manager:
+            return jsonify({'code': 404, 'message': 'Manager not found'}), 404
+
+        # Return arrangements with employee name included
         return jsonify({
             'code': 200,
+            'manager_name': f"{manager.Staff_FName} {manager.Staff_LName}",
             'arrangements': [arr.serialize() for arr in arrangements]
         }), 200
 
     except Exception as e:
         return jsonify({'code': 500, 'message': str(e)}), 500
+
 
 
 # Apply for multiple dates 
@@ -136,5 +143,14 @@ def delete_arrangement(arrangement_id):
 
     except Exception as e:
         return jsonify({'code': 500, 'message': str(e)}), 500
+
+
+
+def get_employee_name(staff_id):
+    employee = Employee.query.get(staff_id)
+    if employee:
+        return f"{employee.Staff_FName} {employee.Staff_LName}"
+    return None
+
 
 
