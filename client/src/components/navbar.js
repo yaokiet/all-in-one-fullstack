@@ -5,6 +5,8 @@ import { ChevronDown, LogOut } from "lucide-react";
 import Modal from "./modal";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import Image from 'next/image';
+
 
 const Navbar = () => {
   const [username, setUsername] = useState("");
@@ -79,7 +81,15 @@ const Navbar = () => {
   return (
     <nav className="bg-blue-500 h-20 w-full text-white flex justify-center">
       <div className="mx-auto w-full flex justify-between items-center px-10">
-        <h1 className="text-xl font-bold">ALLINONE</h1>
+        {/* <h1 className="text-xl font-bold">ALLINONE</h1> */}
+        <Image
+          src="/logo_large.png"
+          alt="All In One Logo"
+          width={100} // Set your desired width
+          height={0} // Set height to 0 to allow auto
+          style={{ height: 'auto' }} // Ensure height adjusts automatically
+          layout="intrinsic" // or layout="responsive"
+        />
         {isAuthenticated && (
           <div className="">
             <button

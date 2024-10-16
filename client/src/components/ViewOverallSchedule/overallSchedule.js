@@ -69,7 +69,7 @@ export default function OverallView({ currentDate }) {
   const formatDate = (date, idx) => format(new Date(currentWeekStart.getTime() + idx * 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
 
   return (
-    <div className="max-w-6xl mx-auto mt-8">
+    <div className="max-w-6xl mx-auto">
       <div className="bg-gray-100 p-4 rounded-lg shadow-md">
         <h2 className="text-xl font-bold mb-4">
           Team WFH and Office Status ({format(currentWeekStart, 'dd MMM')} - {format(currentWeekEnd, 'dd MMM')})
