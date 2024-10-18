@@ -3,7 +3,7 @@ import React from 'react';
 export default function TeamDayCard({ dayData, date, onClick }) {
   return (
     <div 
-      className="relative bg-blue-100 p-4 rounded-lg shadow-md h-full cursor-pointer hover:bg-blue-200 transition-colors"
+      className="relative bg-blue-100 px-4 py-10 rounded-lg shadow-md h-full cursor-pointer hover:bg-blue-200 transition-colors"
       onClick={() => onClick(date, dayData)}
     >
       {dayData ? (

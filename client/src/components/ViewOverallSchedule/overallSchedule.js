@@ -69,8 +69,8 @@ export default function OverallView({ currentDate }) {
   const formatDate = (date, idx) => format(new Date(currentWeekStart.getTime() + idx * 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="bg-gray-100 p-4 rounded-lg shadow-md">
+    <div className="bg-gray-100 rounded-lg shadow-md container mx-auto p-5">
+      <div className="">
         <h2 className="text-xl font-bold mb-4">
           Team WFH and Office Status ({format(currentWeekStart, 'dd MMM')} - {format(currentWeekEnd, 'dd MMM')})
         </h2>
@@ -98,10 +98,13 @@ export default function OverallView({ currentDate }) {
         </div>
 
         {/* Team Schedule Table */}
-        <div className="overflow-x-auto">
+        <div className=" rounded-xl border overflow-hidden">
           <table className="min-w-full bg-white border table-fixed">
             <thead>
               <tr>
+                <th className="px-4 py-2 border">
+                  Time
+                </th>
                 {daysOfWeek.map((day) => (
                   <th key={day} className="px-4 py-2 border">
                     {day}
@@ -110,9 +113,14 @@ export default function OverallView({ currentDate }) {
               </tr>
             </thead>
             <tbody>
+              
+              {/* AM */}
               <tr>
+                <td className="text-center px-4 py-16  border">
+                  AM
+                </td>
                 {isLoading ? (
-                  <td colSpan={daysOfWeek.length} className="text-center py-12">
+                  <td colSpan={daysOfWeek.length} className="text-center px-4 py-6 border">
                     Loading team schedules...
                   </td>
                 ) : (
@@ -121,7 +129,43 @@ export default function OverallView({ currentDate }) {
                     const dayData = teamArrangementsWithCount?.[date];
 
                     return (
-                      <td key={idx} className="px-4 py-6 border">
+                      <td key={idx} className="px-4 py-4 border">
+                        <div 
+                          className="opacity-0 transform translate-y-4 transition-all duration-500 ease-out"
+                          style={{
+                            animationDelay: `${idx * 50}ms`,
+                            animationFillMode: 'forwards',
+                            animation: `fadeInUp 0.3s ease-out ${idx * 50}ms forwards`
+                          }}
+                        >
+                          <TeamDayCard
+                            dayData={dayData}
+                            date={date}
+                            onClick={() => handleDayClick(date)}
+                          />
+                        </div>
+                      </td>
+                    );
+                  })
+                )}
+              </tr>
+              
+              {/* PM */}
+              <tr>
+                <td className="text-center px-4 py-16  border">
+                  PM
+                </td>
+                {isLoading ? (
+                  <td colSpan={daysOfWeek.length} className="text-center px-4 py-6 border">
+                    Loading team schedules...
+                  </td>
+                ) : (
+                  daysOfWeek.map((_, idx) => {
+                    const date = formatDate(currentWeekStart, idx);
+                    const dayData = teamArrangementsWithCount?.[date];
+
+                    return (
+                      <td key={idx} className="px-4 py-4 border">
                         <div 
                           className="opacity-0 transform translate-y-4 transition-all duration-500 ease-out"
                           style={{
