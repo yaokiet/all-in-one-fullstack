@@ -4,9 +4,14 @@ import TeamDayCard from "../teamdaycard";
 import TeamOverview from "./teamoverview";
 
 export default function OverallView({ currentDate }) {
-  const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(currentDate, { weekStartsOn: 1 }));
-  const [currentWeekEnd, setCurrentWeekEnd] = useState(endOfWeek(currentDate, { weekStartsOn: 1 }));
-  const [teamArrangementsWithCount, setTeamArrangementsWithCount] = useState(null);
+  const [currentWeekStart, setCurrentWeekStart] = useState(
+    startOfWeek(currentDate, { weekStartsOn: 1 })
+  );
+  const [currentWeekEnd, setCurrentWeekEnd] = useState(
+    endOfWeek(currentDate, { weekStartsOn: 1 })
+  );
+  const [teamArrangementsWithCount, setTeamArrangementsWithCount] =
+    useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -21,11 +26,11 @@ export default function OverallView({ currentDate }) {
     const fetchTeamArrangements = async () => {
       setIsLoading(true);
       try {
-        const start_date = format(currentWeekStart, 'yyyy-MM-dd');
-        const end_date = format(currentWeekEnd, 'yyyy-MM-dd');
+        const start_date = format(currentWeekStart, "yyyy-MM-dd");
+        const end_date = format(currentWeekEnd, "yyyy-MM-dd");
         const response = await fetch(
-          `http://localhost:5000/team_arrangements_with_count?start_date=${start_date}&end_date=${end_date}`,
-          { method: 'GET', credentials: 'include' }
+          `${process.env.NEXT_PUBLIC_SERVER_URL}/team_arrangements_with_count?start_date=${start_date}&end_date=${end_date}`,
+          { method: "GET", credentials: "include" }
         );
 
         if (!response.ok) throw new Error("Failed to fetch team arrangements");
@@ -33,7 +38,7 @@ export default function OverallView({ currentDate }) {
         const data = await response.json();
         setTeamArrangementsWithCount(data.daily_data);
         setAllTeamMembers(data.team_members);
-        setAnimationTrigger(prev => prev + 1); // Trigger animation
+        setAnimationTrigger((prev) => prev + 1); // Trigger animation
       } catch (error) {
         console.error("Error:", error);
       } finally {
@@ -57,22 +62,28 @@ export default function OverallView({ currentDate }) {
       setCurrentWeekStart(thisWeekStart);
       setCurrentWeekEnd(endOfWeek(thisWeekStart, { weekStartsOn: 1 }));
     } else {
-      const newWeekStart = direction === "next"
-        ? addWeeks(currentWeekStart, 1)
-        : subWeeks(currentWeekStart, 1);
-  
+      const newWeekStart =
+        direction === "next"
+          ? addWeeks(currentWeekStart, 1)
+          : subWeeks(currentWeekStart, 1);
+
       setCurrentWeekStart(newWeekStart);
       setCurrentWeekEnd(endOfWeek(newWeekStart, { weekStartsOn: 1 }));
     }
   };
 
-  const formatDate = (date, idx) => format(new Date(currentWeekStart.getTime() + idx * 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
+  const formatDate = (date, idx) =>
+    format(
+      new Date(currentWeekStart.getTime() + idx * 24 * 60 * 60 * 1000),
+      "yyyy-MM-dd"
+    );
 
   return (
     <div className="bg-gray-100 rounded-lg shadow-md container mx-auto p-5">
       <div className="">
         <h2 className="text-xl font-bold mb-4">
-          Team WFH and Office Status ({format(currentWeekStart, 'dd MMM')} - {format(currentWeekEnd, 'dd MMM')})
+          Team WFH and Office Status ({format(currentWeekStart, "dd MMM")} -{" "}
+          {format(currentWeekEnd, "dd MMM")})
         </h2>
 
         {/* Week Navigation Buttons */}
@@ -102,9 +113,7 @@ export default function OverallView({ currentDate }) {
           <table className="min-w-full bg-white border table-fixed">
             <thead>
               <tr>
-                <th className="px-4 py-2 border">
-                  Time
-                </th>
+                <th className="px-4 py-2 border">Time</th>
                 {daysOfWeek.map((day) => (
                   <th key={day} className="px-4 py-2 border">
                     {day}
@@ -113,14 +122,14 @@ export default function OverallView({ currentDate }) {
               </tr>
             </thead>
             <tbody>
-              
               {/* AM */}
               <tr>
-                <td className="text-center px-4 py-16  border">
-                  AM
-                </td>
+                <td className="text-center px-4 py-16  border">AM</td>
                 {isLoading ? (
-                  <td colSpan={daysOfWeek.length} className="text-center px-4 py-6 border">
+                  <td
+                    colSpan={daysOfWeek.length}
+                    className="text-center px-4 py-6 border"
+                  >
                     Loading team schedules...
                   </td>
                 ) : (
@@ -130,12 +139,14 @@ export default function OverallView({ currentDate }) {
 
                     return (
                       <td key={idx} className="px-4 py-4 border">
-                        <div 
+                        <div
                           className="opacity-0 transform translate-y-4 transition-all duration-500 ease-out"
                           style={{
                             animationDelay: `${idx * 50}ms`,
-                            animationFillMode: 'forwards',
-                            animation: `fadeInUp 0.3s ease-out ${idx * 50}ms forwards`
+                            animationFillMode: "forwards",
+                            animation: `fadeInUp 0.3s ease-out ${
+                              idx * 50
+                            }ms forwards`,
                           }}
                         >
                           <TeamDayCard
@@ -149,14 +160,15 @@ export default function OverallView({ currentDate }) {
                   })
                 )}
               </tr>
-              
+
               {/* PM */}
               <tr>
-                <td className="text-center px-4 py-16  border">
-                  PM
-                </td>
+                <td className="text-center px-4 py-16  border">PM</td>
                 {isLoading ? (
-                  <td colSpan={daysOfWeek.length} className="text-center px-4 py-6 border">
+                  <td
+                    colSpan={daysOfWeek.length}
+                    className="text-center px-4 py-6 border"
+                  >
                     Loading team schedules...
                   </td>
                 ) : (
@@ -166,12 +178,14 @@ export default function OverallView({ currentDate }) {
 
                     return (
                       <td key={idx} className="px-4 py-4 border">
-                        <div 
+                        <div
                           className="opacity-0 transform translate-y-4 transition-all duration-500 ease-out"
                           style={{
                             animationDelay: `${idx * 50}ms`,
-                            animationFillMode: 'forwards',
-                            animation: `fadeInUp 0.3s ease-out ${idx * 50}ms forwards`
+                            animationFillMode: "forwards",
+                            animation: `fadeInUp 0.3s ease-out ${
+                              idx * 50
+                            }ms forwards`,
                           }}
                         >
                           <TeamDayCard

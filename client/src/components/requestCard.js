@@ -34,7 +34,7 @@ export default function RequestCard({
 
     try {
       const response = await fetch(
-        `http://localhost:5000/apply/${request.arrangement_id}`,
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/apply/${request.arrangement_id}`,
         {
           method: "DELETE",
           credentials: "include",

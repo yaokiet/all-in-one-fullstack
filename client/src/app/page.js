@@ -33,7 +33,6 @@ export default function OwnSchedule() {
   });
   const [activeNav, setActiveNav] = useState("View own schedule");
 
-
   const [currentDate, setCurrentDate] = useState(() =>
     getWeekStart(new Date())
   );
@@ -183,7 +182,7 @@ export default function OwnSchedule() {
           const end_date = formatDate(schedule[schedule.length - 1]);
 
           const response = await fetch(
-            `http://localhost:5000/arrangements?start_date=${start_date}&end_date=${end_date}`,
+            `${process.env.NEXT_PUBLIC_SERVER_URL}/arrangements?start_date=${start_date}&end_date=${end_date}`,
             {
               method: "GET",
               credentials: "include",

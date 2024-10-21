@@ -14,10 +14,9 @@ The Work-from-Home (WFH) Tracking System is a web-based application designed to 
 
 ### Technology Stack ###
 - **Frontend**: [ Next.js ] for building the user interface.
-- **Backend**: [ Express.js / Flask ] for handling server-side logic and API requests.
-- **Database**: [Firebase] for managing application data.
-- **Containerisation**: [Docker] for containerising services.
-- **Cloud Deployment**: [Render] for scalable, cloud-based deployment.
+- **Backend**: [ Flask ] for handling server-side logic and API requests.
+- **Database**: [mySQL] for managing application data.
+- **Cloud Deployment**: [Vercel(frontend) & ] for scalable, cloud-based deployment.
 
 ### Getting Started (GIT Commmands) ###
 1. **Clone the Repository**:  
@@ -45,6 +44,12 @@ The Work-from-Home (WFH) Tracking System is a web-based application designed to 
    Set up the necessary environment variables in the `.env` file, including database credentials, cloud configuration, etc.
 
 ### Getting Started (Backend) ###
+
+1. **Install Dependencies**
+   `pip install -r requirements.txt`
+
+2. **Run the Application**
+   `python app.py`
 
 ----
 

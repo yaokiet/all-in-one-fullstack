@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import RequestCard from "@/components/requestCard";
 import ApplyWFHModal from "@/components/ApplyWFHModal";
 
@@ -8,13 +9,14 @@ export default function ApplyWFH() {
   const [activeTab, setActiveTab] = useState("upcoming");
   const [superviserName, setSuperviserName] = useState("");
   const [deleteSignal, setDeleteSignal] = useState(false);
+  const [requestSignal, setRequestSignal] = useState(false);
 
   useEffect(() => {
     // Fetch data from the backend based on activeTab
     const fetchRequests = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/apply?filter=${activeTab}`,
+          `${process.env.NEXT_PUBLIC_SERVER_URL}/apply?filter=${activeTab}`,
           {
             method: "GET",
             credentials: "include",
@@ -37,7 +39,8 @@ export default function ApplyWFH() {
 
     fetchRequests();
     setDeleteSignal(false);
-  }, [activeTab, deleteSignal]); // Fetches data whenever the tab changes
+    setRequestSignal(false);
+  }, [activeTab, deleteSignal, requestSignal]); // Fetches data whenever the tab changes
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -54,44 +57,84 @@ export default function ApplyWFH() {
         <button
           type="button"
           onClick={openModal}
-          className="inline-flex justify-center rounded-md border border-transparent bg-[#6C7BF2] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#5A68D2] focus:outline-none focus:ring-2 focus:ring-[#6C7BF2] focus:ring-offset-2"
+          className="inline-flex justify-center rounded-md border border-transparent bg-blue-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         >
           New Request
         </button>
       </div>
       <div className="flex mb-4">
-        <button
+        <motion.button
           className={`px-4 py-2 mr-2 rounded-md ${
             activeTab === "upcoming"
-              ? "bg-[#6C7BF2] text-white"
+              ? "bg-blue-500 text-white"
               : "bg-gray-200 text-gray-700"
           }`}
           onClick={() => setActiveTab("upcoming")}
+          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.05 }}
         >
           Upcoming
-        </button>
-        <button
+        </motion.button>
+        <motion.button
           className={`px-4 py-2 rounded-md ${
             activeTab === "past"
-              ? "bg-[#6C7BF2] text-white"
+              ? "bg-blue-500 text-white"
               : "bg-gray-200 text-gray-700"
           }`}
           onClick={() => setActiveTab("past")}
+          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.05 }}
         >
           Past
-        </button>
+        </motion.button>
       </div>
-      <div className="space-y-6">
-        {requests.map((request) => (
-          <RequestCard
-            key={request.id}
-            request={request}
-            superviserName={superviserName}
-            setDeleteSignal={setDeleteSignal}
-          />
-        ))}
-      </div>
-      <ApplyWFHModal isOpen={isModalOpen} onClose={closeModal} />
+
+      {/* Request Cards with Animation */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="space-y-6"
+        >
+          {requests.map((request, index) => (
+            <motion.div
+              key={request.id}
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.1, delay: index * 0.1 }}
+            >
+              <RequestCard
+                request={request}
+                superviserName={superviserName}
+                setDeleteSignal={setDeleteSignal}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Modal with Animation */}
+      <AnimatePresence>
+        {isModalOpen && (
+          <motion.div
+            key="modal"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.2 }}
+          >
+            <ApplyWFHModal
+              isOpen={isModalOpen}
+              onClose={closeModal}
+              setRequestSignal={setRequestSignal}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
