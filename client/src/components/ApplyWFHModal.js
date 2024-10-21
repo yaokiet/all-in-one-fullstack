@@ -65,14 +65,17 @@ export default function ApplyWFHModal({ isOpen, onClose, setRequestSignal }) {
     };
 
     try {
-      const response = await fetch("http://localhost:5000/apply", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-        credentials: "include",
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/apply`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+          credentials: "include",
+        }
+      );
 
       const data = await response.json();
 

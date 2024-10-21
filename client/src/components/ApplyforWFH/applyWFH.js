@@ -16,7 +16,7 @@ export default function ApplyWFH() {
     const fetchRequests = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/apply?filter=${activeTab}`,
+          `${process.env.NEXT_PUBLIC_SERVER_URL}/apply?filter=${activeTab}`,
           {
             method: "GET",
             credentials: "include",
