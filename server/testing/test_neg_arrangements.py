@@ -57,3 +57,64 @@ def test_invalid_date_range(client):
     response_json = response.get_json()
     assert response_json['message'] == 'Invalid date range. Start Date cannot be after End Date.'
     assert response_json['code'] == 400
+    
+def test_create_work_arrangement_missing_fields(client):
+    # Omit the 'arrangement_date' field
+    arrangement_data = {
+        "staff_id": create_dummy_employee(),
+        "approving_id": create_dummy_employee(),
+        "arrangement_type": "WFH",
+        # Missing 'arrangement_date'
+    }
+    response = client.post('/arrangements', json=arrangement_data)
+    assert response.status_code == 400
+    assert "arrangement_date is required" in response.get_json()['message']
+
+def test_invalid_date_format(client):
+    # Create a dummy employee
+    staff_id = create_dummy_employee()
+
+    # Use an invalid date format
+    start_date = '10-01-2024'
+    end_date = '10-31-2024'
+
+    response = client.get(f'/arrangements?staff_id={staff_id}&start_date={start_date}&end_date={end_date}')
+    assert response.status_code == 400
+    assert "Invalid date format" in response.get_json()['message']
+
+def test_update_arrangement_invalid_status(client):
+    # Step 1: Create a dummy employee and work arrangement
+    staff_id = create_dummy_employee()
+    arrangement_data = {
+        "staff_id": staff_id,
+        "approving_id": staff_id,
+        "arrangement_type": "WFH",
+        "arrangement_date": date.today().strftime('%Y-%m-%d')
+    }
+    response = client.post('/arrangements', json=arrangement_data)
+    arrangement = response.get_json()['arrangement']
+
+    # Step 2: Attempt to update status with an invalid value
+    update_data = {
+        "status": "InvalidStatus"
+    }
+    response = client.patch(f'/arrangements/{arrangement["arrangement_id"]}', json=update_data)
+    assert response.status_code == 400
+    assert "Invalid status" in response.get_json()['message']
+
+def test_update_arrangement_missing_status(client):
+    # Step 1: Create a dummy employee and work arrangement
+    staff_id = create_dummy_employee()
+    arrangement_data = {
+        "staff_id": staff_id,
+        "approving_id": staff_id,
+        "arrangement_type": "WFH",
+        "arrangement_date": date.today().strftime('%Y-%m-%d')
+    }
+    response = client.post('/arrangements', json=arrangement_data)
+    arrangement = response.get_json()['arrangement']
+
+    # Step 2: Attempt to update arrangement without providing a status
+    response = client.patch(f'/arrangements/{arrangement["arrangement_id"]}', json={})
+    assert response.status_code == 400
+    assert "Status is required" in response.get_json()['message']
