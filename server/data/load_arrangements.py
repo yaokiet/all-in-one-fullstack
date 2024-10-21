@@ -1,7 +1,10 @@
 from extensions import db
 from datetime import datetime, timedelta
 from models.arrangement import Arrangement
+# from arrangement import Arrangement
 from app import create_app  
+
+# export PYTHONPATH=$PYTHONPATH:/Users/joelsng/Documents/GitHub/all-in-one-fullstack/server
 
 # This file will load test arrangements for a user. this user has been created for testing purposes only
 # staff_id = 210045 with reporting_manager 130002
