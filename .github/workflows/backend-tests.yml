@@ -3,7 +3,8 @@ name: Run Pytest on backend API calls
 on:
   push:
     branches:
-      - backend 
+      - backend
+      - master 
 
 jobs:
   test:
