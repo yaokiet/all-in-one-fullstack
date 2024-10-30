@@ -34,7 +34,7 @@ def login():
             return jsonify({
                 'code': 400, 
                 'message':"Email and password are required"
-                })
+                }), 400
         
         email = data['email']
         password = data['password']
@@ -46,7 +46,7 @@ def login():
             return jsonify({
                 'code': 400, 
                 'message':"Employee not found"
-                })
+                }),400
 
         if password != "tieguanyin":
             return jsonify({

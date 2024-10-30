@@ -5,8 +5,7 @@ import { ChevronDown, LogOut } from "lucide-react";
 import Modal from "./modal";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import Image from 'next/image';
-
+import Image from "next/image";
 
 const Navbar = () => {
   const [username, setUsername] = useState("");
@@ -25,7 +24,7 @@ const Navbar = () => {
   const confirmLogout = async () => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/logout",
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/logout`,
         {},
         {
           withCredentials: true,
@@ -52,7 +51,7 @@ const Navbar = () => {
     const checkAuth = async () => {
       try {
         const response = await axios.post(
-          "http://localhost:5000/auth",
+          `${process.env.NEXT_PUBLIC_SERVER_URL}/auth`,
           {},
           {
             withCredentials: true,
@@ -87,7 +86,7 @@ const Navbar = () => {
           alt="All In One Logo"
           width={75} // Set your desired width
           height={0} // Set height to 0 to allow auto
-          style={{ height: 'auto' }} // Ensure height adjusts automatically
+          style={{ height: "auto" }} // Ensure height adjusts automatically
           layout="intrinsic" // or layout="responsive"
           className=""
         />
