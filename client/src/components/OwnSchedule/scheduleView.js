@@ -4,11 +4,20 @@ import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 
 const ScheduleView = ({ schedule, workMode, currentDate, viewMode, navigate, returnToCurrent, setViewMode, setCurrentDate }) => {
     const getWeekStart = (date) => {
-        const d = new Date(date);
-        const day = d.getDay();
-        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-        return new Date(d.setDate(diff));
+        const d = new Date(date);  // Create a new date instance
+        const day = d.getDay();    // Get the current day of the week (0 for Sunday, 6 for Saturday)
+        
+        // Calculate the difference to move back to Monday (if Sunday, move back 6 days; otherwise, day - 1)
+        const diff = day === 0 ? 6 : day - 1;  
+        d.setDate(d.getDate() - diff);  // Adjust the date to move back to Monday
+        
+        d.setHours(0, 0, 0, 0);  // Reset the time to midnight to avoid time zone issues
+        return d;
     };
+    // useEffect(() => {
+    //     const weekStart = getWeekStart(currentDate);
+    //     console.log("Week starts on:", weekStart);
+    // }, [currentDate]);
 
     const [selectedDate, setSelectedDate] = useState(() => getWeekStart(currentDate));
     const [dateOptions, setDateOptions] = useState([]);
@@ -72,6 +81,13 @@ const ScheduleView = ({ schedule, workMode, currentDate, viewMode, navigate, ret
         setSelectedDate(selectedDate);
         setCurrentDate(selectedDate);
     };
+    const formatDateOnly = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;  // Returns YYYY-MM-DD in local time
+    };
+    
 
     return (
         <div className="space-y-4">
@@ -113,7 +129,7 @@ const ScheduleView = ({ schedule, workMode, currentDate, viewMode, navigate, ret
             </div>
             <div className="grid grid-cols-7 gap-4">
                 {schedule.map((day) => {
-                    const formattedDate = day.toISOString().split('T')[0];
+                    const formattedDate = formatDateOnly(day);
                     const dayData = workMode[formattedDate] || { mode: "Office", status: "N/A" };
                     return (
                         <DayCard

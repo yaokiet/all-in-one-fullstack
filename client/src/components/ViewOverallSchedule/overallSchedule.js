@@ -1,164 +1,230 @@
 import React, { useState, useEffect } from "react";
 import { format, addWeeks, subWeeks, startOfWeek, endOfWeek } from "date-fns";
+import TeamDayCard from "../teamdaycard";
+import TeamOverview from "./teamoverview";
 
-export default function OverallView({
-  teamSchedules,
-  currentDate,
-  viewMode,
-  returnToCurrent,
-  setViewMode,
-}) {
-  const [selectedTeamMember, setSelectedTeamMember] = useState("");
-  const [filteredSchedule, seatFilteredSchedule] = useState([]);
-  const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(currentDate, { weekStartsOn: 1 })); // Monday as start of the week
-  const [currentWeekEnd, setCurrentWeekEnd] = useState(endOfWeek(currentDate, { weekStartsOn: 1 }));
+export default function OverallView({ currentDate }) {
+  const [currentWeekStart, setCurrentWeekStart] = useState(
+    startOfWeek(currentDate, { weekStartsOn: 1 })
+  );
+  const [currentWeekEnd, setCurrentWeekEnd] = useState(
+    endOfWeek(currentDate, { weekStartsOn: 1 })
+  );
+  const [teamArrangementsWithCount, setTeamArrangementsWithCount] =
+    useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedTeamData, setSelectedTeamData] = useState([]);
+  const [allTeamMembers, setAllTeamMembers] = useState([]);
+  const [animationTrigger, setAnimationTrigger] = useState(0);
 
-  // Handle team member selection from dropdown
-  const handleMemberSelect = (e) => {
-    setSelectedTeamMember(e.target.value);
-  };
-
-  const teamMembers = [
-    ...new Set(teamSchedules.map((schedule) => schedule.memberName)),
-  ];
-
-  // Badge styling for WFH and In Office
-  const badgeStyle = {
-    wfh: "bg-blue-100 text-blue-700 px-2 py-1 rounded-full",
-    office: "bg-green-100 text-green-700 px-2 py-1 rounded-full",
-  };
-
-  // Days of the week (Monday to Friday)
   const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
-  // Filter team schedule based on the selected team member and the current week range
+  // Fetch team arrangements for the week
   useEffect(() => {
-    const filtered = selectedTeamMember
-      ? teamSchedules.filter((schedule) => schedule.memberName === selectedTeamMember)
-      : teamSchedules;
+    const fetchTeamArrangements = async () => {
+      setIsLoading(true);
+      try {
+        const start_date = format(currentWeekStart, "yyyy-MM-dd");
+        const end_date = format(currentWeekEnd, "yyyy-MM-dd");
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_SERVER_URL}/team_arrangements_with_count?start_date=${start_date}&end_date=${end_date}`,
+          { method: "GET", credentials: "include" }
+        );
 
-    // Filter by current week range (simulated here for demo)
-    const weekFilteredSchedule = filtered.filter((schedule) => {
-      // Logic to determine if the schedule falls within the currentWeekStart to currentWeekEnd
-      // For this example, we assume the `schedule.range` contains week info and adjust accordingly
-      return true; // Placeholder, adjust based on your date format
-    });
+        if (!response.ok) throw new Error("Failed to fetch team arrangements");
 
-    setFilteredSchedule(weekFilteredSchedule);
-  }, [selectedTeamMember, teamSchedules, currentWeekStart, currentWeekEnd]);
+        const data = await response.json();
+        setTeamArrangementsWithCount(data.daily_data);
+        setAllTeamMembers(data.team_members);
+        setAnimationTrigger((prev) => prev + 1); // Trigger animation
+      } catch (error) {
+        console.error("Error:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  // Navigate between weeks
-  const handlePreviousWeek = () => {
-    const previousWeekStart = subWeeks(currentWeekStart, 1);
-    setCurrentWeekStart(previousWeekStart);
-    setCurrentWeekEnd(endOfWeek(previousWeekStart, { weekStartsOn: 1 }));
+    fetchTeamArrangements();
+  }, [currentWeekStart, currentWeekEnd]);
+
+  const handleDayClick = (date) => {
+    const dayData = teamArrangementsWithCount?.[date];
+    setSelectedDate(date);
+    if (dayData) setSelectedTeamData(dayData.schedules);
+    setModalOpen(true);
   };
 
-  const handleNextWeek = () => {
-    const nextWeekStart = addWeeks(currentWeekStart, 1);
-    setCurrentWeekStart(nextWeekStart);
-    setCurrentWeekEnd(endOfWeek(nextWeekStart, { weekStartsOn: 1 }));
+  const navigateWeek = (direction) => {
+    if (direction === "current") {
+      const thisWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+      setCurrentWeekStart(thisWeekStart);
+      setCurrentWeekEnd(endOfWeek(thisWeekStart, { weekStartsOn: 1 }));
+    } else {
+      const newWeekStart =
+        direction === "next"
+          ? addWeeks(currentWeekStart, 1)
+          : subWeeks(currentWeekStart, 1);
+
+      setCurrentWeekStart(newWeekStart);
+      setCurrentWeekEnd(endOfWeek(newWeekStart, { weekStartsOn: 1 }));
+    }
   };
 
-  const handleCurrentWeek = () => {
-    const thisWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
-    setCurrentWeekStart(thisWeekStart);
-    setCurrentWeekEnd(endOfWeek(thisWeekStart, { weekStartsOn: 1 }));
-  };
+  const formatDate = (date, idx) =>
+    format(
+      new Date(currentWeekStart.getTime() + idx * 24 * 60 * 60 * 1000),
+      "yyyy-MM-dd"
+    );
 
   return (
-    <div className="max-w-6xl mx-auto mt-8">
-      <div className="bg-gray-100 p-4 rounded-lg shadow-md">
+    <div className="bg-gray-100 rounded-lg shadow-md container mx-auto p-5">
+      <div className="">
         <h2 className="text-xl font-bold mb-4">
-          Team WFH and Office Status ({format(currentWeekStart, 'dd MMM')} - {format(currentWeekEnd, 'dd MMM')})
+          Team WFH and Office Status ({format(currentWeekStart, "dd MMM")} -{" "}
+          {format(currentWeekEnd, "dd MMM")})
         </h2>
 
-        {/* Filter Section */}
-        <div className="flex justify-between items-center mb-4">
-          <select
-            value={selectedTeamMember}
-            onChange={handleMemberSelect}
-            className="border rounded p-2 bg-white shadow-md"
-          >
-            <option value="">All Team Members</option>
-            {teamMembers.map((member, idx) => (
-              <option key={idx} value={member}>
-                {member}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Week Navigation */}
+        {/* Week Navigation Buttons */}
         <div className="flex justify-between mb-4">
           <button
-            onClick={handlePreviousWeek}
+            onClick={() => navigateWeek("previous")}
             className="bg-gray-300 text-black px-4 py-2 rounded shadow hover:bg-gray-400"
           >
             Previous Week
           </button>
           <button
-            onClick={handleCurrentWeek}
+            onClick={() => navigateWeek("current")}
             className="bg-green-500 text-white px-4 py-2 rounded shadow hover:bg-green-600"
           >
             Current Week
           </button>
           <button
-            onClick={handleNextWeek}
+            onClick={() => navigateWeek("next")}
             className="bg-gray-300 text-black px-4 py-2 rounded shadow hover:bg-gray-400"
           >
             Next Week
           </button>
         </div>
 
-        {/* Table Structure for Days */}
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white border">
+        {/* Team Schedule Table */}
+        <div className=" rounded-xl border overflow-hidden">
+          <table className="min-w-full bg-white border table-fixed">
             <thead>
               <tr>
-                <th className="px-4 py-2 border text-left">Team Member</th>
-                {daysOfWeek.map((day, idx) => (
-                  <th key={idx} className="px-4 py-2 border text-left">
+                <th className="px-4 py-2 border">Time</th>
+                {daysOfWeek.map((day) => (
+                  <th key={day} className="px-4 py-2 border">
                     {day}
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {filteredSchedule.length > 0 ? (
-                filteredSchedule.map((schedule, idx) => (
-                  <tr key={idx} className="border-b">
-                    <td className="px-4 py-2 border">{schedule.memberName}</td>
-                    {daysOfWeek.map((day, dayIdx) => (
-                      <td key={dayIdx} className="px-4 py-2 border">
-                        <span
-                          className={
-                            schedule[day]?.status === "WFH"
-                              ? badgeStyle.wfh
-                              : badgeStyle.office
-                          }
-                        >
-                          {schedule[day]?.status === "WFH"
-                            ? "WFH"
-                            : "In Office"}
-                        </span>
-                      </td>
-                    ))}
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="px-4 py-2 text-center">
-                    No schedules found.
+              {/* AM */}
+              <tr>
+                <td className="text-center px-4 py-16  border">AM</td>
+                {isLoading ? (
+                  <td
+                    colSpan={daysOfWeek.length}
+                    className="text-center px-4 py-6 border"
+                  >
+                    Loading team schedules...
                   </td>
-                </tr>
-              )}
+                ) : (
+                  daysOfWeek.map((_, idx) => {
+                    const date = formatDate(currentWeekStart, idx);
+                    const dayData = teamArrangementsWithCount?.[date];
+
+                    return (
+                      <td key={idx} className="px-4 py-4 border">
+                        <div
+                          className="opacity-0 transform translate-y-4 transition-all duration-500 ease-out"
+                          style={{
+                            animationDelay: `${idx * 50}ms`,
+                            animationFillMode: "forwards",
+                            animation: `fadeInUp 0.3s ease-out ${
+                              idx * 50
+                            }ms forwards`,
+                          }}
+                        >
+                          <TeamDayCard
+                            dayData={dayData}
+                            date={date}
+                            onClick={() => handleDayClick(date)}
+                          />
+                        </div>
+                      </td>
+                    );
+                  })
+                )}
+              </tr>
+
+              {/* PM */}
+              <tr>
+                <td className="text-center px-4 py-16  border">PM</td>
+                {isLoading ? (
+                  <td
+                    colSpan={daysOfWeek.length}
+                    className="text-center px-4 py-6 border"
+                  >
+                    Loading team schedules...
+                  </td>
+                ) : (
+                  daysOfWeek.map((_, idx) => {
+                    const date = formatDate(currentWeekStart, idx);
+                    const dayData = teamArrangementsWithCount?.[date];
+
+                    return (
+                      <td key={idx} className="px-4 py-4 border">
+                        <div
+                          className="opacity-0 transform translate-y-4 transition-all duration-500 ease-out"
+                          style={{
+                            animationDelay: `${idx * 50}ms`,
+                            animationFillMode: "forwards",
+                            animation: `fadeInUp 0.3s ease-out ${
+                              idx * 50
+                            }ms forwards`,
+                          }}
+                        >
+                          <TeamDayCard
+                            dayData={dayData}
+                            date={date}
+                            onClick={() => handleDayClick(date)}
+                          />
+                        </div>
+                      </td>
+                    );
+                  })
+                )}
+              </tr>
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* Modal for team status */}
+      <TeamOverview
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        date={selectedDate}
+        teamData={selectedTeamData}
+        allTeamMembers={allTeamMembers}
+      />
+
+      <style jsx>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(5px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 }
-
-

@@ -5,11 +5,12 @@ import { ChevronDown, LogOut } from "lucide-react";
 import Modal from "./modal";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const Navbar = () => {
   const [username, setUsername] = useState("");
   const [role, setRole] = useState("");
-  const [position, setPosition] = useState("")
+  const [position, setPosition] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
@@ -23,7 +24,7 @@ const Navbar = () => {
   const confirmLogout = async () => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/logout",
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/logout`,
         {},
         {
           withCredentials: true,
@@ -50,7 +51,7 @@ const Navbar = () => {
     const checkAuth = async () => {
       try {
         const response = await axios.post(
-          "http://localhost:5000/auth",
+          `${process.env.NEXT_PUBLIC_SERVER_URL}/auth`,
           {},
           {
             withCredentials: true,
@@ -62,8 +63,7 @@ const Navbar = () => {
           setUsername(
             response.data.staff_fname + " " + response.data.staff_lname
           );
-          setPosition(response.data.position)
-          
+          setPosition(response.data.position);
         } else {
           console.log("error with auth", response.data);
           router.push("/authentication");
@@ -79,8 +79,17 @@ const Navbar = () => {
 
   return (
     <nav className="bg-blue-500 h-20 w-full text-white flex justify-center">
-      <div className="mx-auto w-full flex justify-between items-center px-10">
-        <h1 className="text-xl font-bold">Own Schedule</h1>
+      <div className="mx-auto w-full flex justify-between items-center px-10 pl-20">
+        {/* <h1 className="text-xl font-bold">ALLINONE</h1> */}
+        <Image
+          src="/logo_large.png"
+          alt="All In One Logo"
+          width={75} // Set your desired width
+          height={0} // Set height to 0 to allow auto
+          style={{ height: "auto" }} // Ensure height adjusts automatically
+          layout="intrinsic" // or layout="responsive"
+          className=""
+        />
         {isAuthenticated && (
           <div className="">
             <button
@@ -113,6 +122,7 @@ const Navbar = () => {
         onConfirm={confirmLogout}
         title="Confirm Logout"
         message="Are you sure you want to log out?"
+        buttonMessage={"Logout"}
       />
     </nav>
   );

@@ -1,91 +1,140 @@
-"use client"
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import RequestCard from "@/components/requestCard";
+import ApplyWFHModal from "@/components/ApplyWFHModal";
 
-import React, { useState } from 'react'
-import ApplyWFHModal from './ApplyWFHModal'
+export default function ApplyWFH() {
+  const [requests, setRequests] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("upcoming");
+  const [superviserName, setSuperviserName] = useState("");
+  const [deleteSignal, setDeleteSignal] = useState(false);
+  const [requestSignal, setRequestSignal] = useState(false);
 
-export default function ScheduleManagement() {
-  const [activeTab, setActiveTab] = useState('upcoming')
-  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false)
+  useEffect(() => {
+    // Fetch data from the backend based on activeTab
+    const fetchRequests = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_SERVER_URL}/apply?filter=${activeTab}`,
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
 
-  const handleTabChange = (tab) => {
-    setActiveTab(tab)
-  }
+        const data = await response.json();
 
-  const openApplyModal = () => {
-    setIsApplyModalOpen(true)
-  }
+        if (response.ok) {
+          setRequests(data.arrangements);
+          setSuperviserName(data.manager_name);
+          console.log(data);
+        } else {
+          console.error("Failed to fetch data:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
 
-  const closeApplyModal = () => {
-    setIsApplyModalOpen(false)
-  }
+    fetchRequests();
+    setDeleteSignal(false);
+    setRequestSignal(false);
+  }, [activeTab, deleteSignal, requestSignal]); // Fetches data whenever the tab changes
+
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-      <div className="w-64 bg-white shadow-md">
-        <nav className="mt-5">
-          <a href="#" className="block py-2 px-4 text-gray-700 hover:bg-gray-200">View own schedule</a>
-          <a href="#" className="block py-2 px-4 text-gray-700 hover:bg-gray-200">Apply for WFH</a>
-          <a href="#" className="block py-2 px-4 text-gray-700 hover:bg-gray-200">View overall schedule</a>
-        </nav>
+    <div className="bg-gray-100 rounded-lg shadow-md container mx-auto p-5">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-xl font-bold">Work From Home Requests</h1>
+        <button
+          type="button"
+          onClick={openModal}
+          className="inline-flex justify-center rounded-md border border-transparent bg-blue-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        >
+          New Request
+        </button>
+      </div>
+      <div className="flex mb-4">
+        <motion.button
+          className={`px-4 py-2 mr-2 rounded-md ${
+            activeTab === "upcoming"
+              ? "bg-blue-500 text-white"
+              : "bg-gray-200 text-gray-700"
+          }`}
+          onClick={() => setActiveTab("upcoming")}
+          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.05 }}
+        >
+          Upcoming
+        </motion.button>
+        <motion.button
+          className={`px-4 py-2 rounded-md ${
+            activeTab === "past"
+              ? "bg-blue-500 text-white"
+              : "bg-gray-200 text-gray-700"
+          }`}
+          onClick={() => setActiveTab("past")}
+          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.05 }}
+        >
+          Past
+        </motion.button>
       </div>
 
-      {/* Main content */}
-      <div className="flex-1 p-10">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex space-x-2">
-            <button
-              onClick={() => handleTabChange('upcoming')}
-              className={`px-4 py-2 rounded ${
-                activeTab === 'upcoming' ? 'bg-blue-500 text-white' : 'bg-gray-200'
-              }`}
+      {/* Request Cards with Animation */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="space-y-6"
+        >
+          {requests.map((request, index) => (
+            <motion.div
+              key={request.id}
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.1, delay: index * 0.1 }}
             >
-              Upcoming
-            </button>
-            <button
-              onClick={() => handleTabChange('pending')}
-              className={`px-4 py-2 rounded ${
-                activeTab === 'pending' ? 'bg-blue-500 text-white' : 'bg-gray-200'
-              }`}
-            >
-              Pending
-            </button>
-          </div>
-          <button
-            onClick={openApplyModal}
-            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+              <RequestCard
+                request={request}
+                superviserName={superviserName}
+                setDeleteSignal={setDeleteSignal}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Modal with Animation */}
+      <AnimatePresence>
+        {isModalOpen && (
+          <motion.div
+            key="modal"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.2 }}
           >
-            Apply+
-          </button>
-        </div>
-
-        <table className="min-w-full bg-white">
-          <thead>
-            <tr>
-              <th className="py-2 px-4 border-b">Date</th>
-              <th className="py-2 px-4 border-b">Manager Name</th>
-              <th className="py-2 px-4 border-b">Status</th>
-              <th className="py-2 px-4 border-b">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* Sample data - replace with actual data */}
-            <tr>
-              <td className="py-2 px-4 border-b">2023-05-15</td>
-              <td className="py-2 px-4 border-b">John Doe</td>
-              <td className="py-2 px-4 border-b">Approved</td>
-              <td className="py-2 px-4 border-b">
-                <button className="text-blue-500 hover:text-blue-700 mr-2">Change</button>
-                <button className="text-red-500 hover:text-red-700">Withdraw</button>
-              </td>
-            </tr>
-            {/* Add more rows as needed */}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Apply WFH Modal */}
-      <ApplyWFHModal isOpen={isApplyModalOpen} onClose={closeApplyModal} />
+            <ApplyWFHModal
+              isOpen={isModalOpen}
+              onClose={closeModal}
+              setRequestSignal={setRequestSignal}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
-  )
+  );
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Modal = ({ isOpen, onClose, onConfirm, title, message }) => {
+const Modal = ({ isOpen, onClose, onConfirm, title, message, buttonMessage }) => {
   if (!isOpen) return null;
 
   return (
@@ -19,7 +19,7 @@ const Modal = ({ isOpen, onClose, onConfirm, title, message }) => {
             onClick={onConfirm}
             className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
           >
-            Log out
+            {buttonMessage}
           </button>
         </div>
       </div>

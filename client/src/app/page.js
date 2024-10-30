@@ -17,12 +17,12 @@ export default function OwnSchedule() {
 
   const getWeekStart = useCallback((date) => {
     const d = new Date(date);
-    d.setHours(0, 0, 0, 0);
     const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-    return new Date(d.setDate(diff));
+    const diff = (day === 0 ? -6 : 1) - day;
+    d.setDate(d.getDate() + diff);
+    d.setHours(0, 0, 0, 0);
+    return d;
   }, []);
-
   const [schedule, setSchedule] = useState([]);
   const [workArrangements, setWorkArrangements] = useState([]);
   const [workModeByDate, setWorkModeByDate] = useState({});
@@ -32,6 +32,7 @@ export default function OwnSchedule() {
     role: "Software Developer",
   });
   const [activeNav, setActiveNav] = useState("View own schedule");
+
   const [currentDate, setCurrentDate] = useState(() =>
     getWeekStart(new Date())
   );
@@ -163,29 +164,25 @@ export default function OwnSchedule() {
   );
 
   useEffect(() => {
-    console.log("Generating Schedule for Date:", currentDate);
-    generateSchedule(currentDate, viewMode);
-  }, [currentDate, viewMode, generateSchedule]);
+    if (activeNav !== "View own schedule") return;
+    if (activeNav === "View own schedule") {
+      generateSchedule(currentDate, viewMode);
+    }
+  }, [currentDate, viewMode, generateSchedule, activeNav]);
 
   useEffect(() => {
-    if (schedule.length > 0) {
-      const staff_id = user.userid;
-      const start_date = formatDate(schedule[0]);
-      const end_date = formatDate(schedule[schedule.length - 1]);
-
-      console.log(
-        "Fetching work arrangements for:",
-        start_date,
-        "to",
-        end_date
-      );
-
+    if (activeNav !== "View own schedule" || schedule.length === 0) return;
+    if (activeNav === "View own schedule" && schedule.length > 0) {
       const fetchOwnArrangements = async () => {
-        setIsLoading(true);
-        setError(null);
+        setIsLoading(true); // Only set loading state when needed
+        setError(null); // Reset error state on fetch start
+
         try {
+          const start_date = formatDate(schedule[0]);
+          const end_date = formatDate(schedule[schedule.length - 1]);
+
           const response = await fetch(
-            `http://localhost:5000/arrangements?start_date=${start_date}&end_date=${end_date}`,
+            `${process.env.NEXT_PUBLIC_SERVER_URL}/arrangements?start_date=${start_date}&end_date=${end_date}`,
             {
               method: "GET",
               credentials: "include",
@@ -197,13 +194,13 @@ export default function OwnSchedule() {
           }
 
           const data = await response.json();
-          console.log("Work Arrangements:", data);
-          setWorkArrangements(data);
-          updateWorkModeandStatus(data);
+          setWorkArrangements(data); // Update only if data is fetched
+          updateWorkModeandStatus(data); // Update work mode status based on data
         } catch (err) {
           console.error("Error fetching work arrangements:", err.message);
           setError(`Failed to fetch work arrangements: ${err.message}`);
-          // Set default work mode if fetch fails
+
+          // Fallback to default state in case of fetch failure
           const defaultWorkMode = {};
           schedule.forEach((date) => {
             const formattedDate = formatDate(date);
@@ -214,15 +211,14 @@ export default function OwnSchedule() {
           });
           setWorkModeByDate(defaultWorkMode);
         } finally {
-          setIsLoading(false);
+          setIsLoading(false); // Stop loading once fetch is done
         }
       };
 
       fetchOwnArrangements();
     } else {
-      console.log("Schedule is empty, waiting for it to populate...");
     }
-  }, [schedule, user.userid, formatDate, updateWorkModeandStatus]);
+  }, [schedule, user.userid, formatDate, updateWorkModeandStatus, activeNav]);
 
   useEffect(() => {
     const today = new Date();
@@ -270,26 +266,6 @@ export default function OwnSchedule() {
     }
   }, [viewMode, getWeekStart]);
 
-  const [teamSchedules, setTeamSchedules] = useState([]);
-  const [isLoadingTeam, setIsLoadingTeam] = useState(false);
-  
-  useEffect(() => {
-    const fetchTeamSchedules = async () => {
-      setIsLoadingTeam(true);
-      try {
-        const response = await fetch(`http://localhost:5000/team-schedule`);
-        const data = await response.json();
-        setTeamSchedules(data);
-      } catch (err) {
-        console.error("Failed to fetch team schedules", err);
-      } finally {
-        setIsLoadingTeam(false);
-      }
-    };
-
-    fetchTeamSchedules();
-  }, []);
-
   return (
     <div className="flex flex-col h-screen">
       <Navbar user={user} />
@@ -301,6 +277,7 @@ export default function OwnSchedule() {
               <p>Loading work arrangements...</p>
             </div>
           )}
+
           {activeNav === "View own schedule" && (
             <ScheduleView
               schedule={schedule}
@@ -310,9 +287,11 @@ export default function OwnSchedule() {
               navigate={navigate}
               returnToCurrent={returnToCurrent}
               setViewMode={setViewMode}
+              setCurrentDate={setCurrentDate}
               error={error}
             />
           )}
+
           {activeNav === "Apply for WFH" && (
             <WFHApplicationForm
               wfhForm={wfhForm}
@@ -323,9 +302,9 @@ export default function OwnSchedule() {
               handleWfhSubmit={handleWfhSubmit}
             />
           )}
+
           {activeNav === "View Overall Schedule" && (
             <OverallView
-              teamSchedules={teamSchedules}
               currentDate={currentDate}
               viewMode={viewMode}
               navigate={navigate}
