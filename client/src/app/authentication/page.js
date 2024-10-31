@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"; // Import useRouter from Next.js
 import { Input, Button } from "@nextui-org/react";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 import axios from "axios";
+import Image from "next/image"
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -50,51 +51,79 @@ export default function LoginPage() {
       setMessageColor("text-red-500");
     }
   };
+  // Keydown event handler to check for Enter key press
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleLogin(e);
+    }
+  };
 
   return (
     <div className="w-full h-screen flex items-center justify-center bg-slate-500">
-      <div className="flex overflow-hidden rounded-lg shadow-lg w-[400px] h-[300px] md:w-[600px] md:h-[400px]">
-        <div className="flex-1 bg-white p-6 flex flex-col justify-center">
+      <div className="flex overflow-hidden rounded-lg shadow-lg w-[800px] h-[500px]">
+        <div className="flex-1 bg-white p-8 flex flex-col justify-center">
+          <h2 className="text-2xl font-bold mb-6 text-gray-800">Login</h2>
           <div className="space-y-6">
             <Input
               type="text"
               label="Username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              onKeyDown={handleKeyDown} // Add keydown event handler for password input
               className="max-w-xs"
-              color={inputColor} // Change input color dynamically
+              color={inputColor}
             />
             <div className="relative max-w-xs">
               <Input
-                type={showPassword ? "text" : "password"} // Toggle between text and password
+                type={showPassword ? "text" : "password"}
                 label="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                color={inputColor} // Change input color dynamically
+                onKeyDown={handleKeyDown} // Add keydown event handler for password input
+                color={inputColor}
                 className="w-full"
               />
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)} // Toggle password visibility
+                onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-900"
               >
                 {showPassword ? (
-                  <EyeSlashIcon className="h-6 w-6" /> // EyeSlashIcon for "hide"
+                  <EyeSlashIcon className="text-blue-500 h-6 w-6" />
                 ) : (
-                  <EyeIcon className="h-6 w-6" /> // EyeIcon for "show"
+                  <EyeIcon className="h-6 w-6" />
                 )}
               </button>
             </div>
-            {message && <p className={`${messageColor}`}>{message}</p>}
+            {message && <p className={messageColor}>{message}</p>}
+            <Button
+              className="bg-blue-500 text-white hover:bg-blue-700 w-full"
+              onClick={handleLogin}
+            >
+              LOGIN
+            </Button>
           </div>
         </div>
-        <div className="w-24 bg-gray-800 flex items-center justify-center">
-          <Button
-            className="bg-gray-800 text-white hover:bg-gray-700"
-            onClick={handleLogin}
-          >
-            LOGIN
-          </Button>
+        <div className="w-[400px] bg-blue-500 flex flex-col items-center justify-center p-8">
+          <div className="mb-8">
+            <Image
+              src="/logo_large.png"
+              alt="Company Logo"
+              width={200}
+              height={100}
+              priority
+            />
+          </div>
+          <div>
+            <Image
+              src="/title.png"
+              alt="All in One"
+              width={200}
+              height={50}
+              priority
+            />
+
+          </div>
         </div>
       </div>
     </div>

@@ -8,29 +8,22 @@ from controllers.employee_controller import employee_bp
 from controllers.team_view_controller import team_view_bp
 from controllers.apply_controller import apply_bp
 
+# Create the app at the global level so Vercel can recognize it
+app = Flask(__name__)
+CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
 
+# Set configurations
+app.config.from_object(DevelopmentConfig)
 
-def create_app(config_class = DevelopmentConfig):
-    app = Flask(__name__)
-    CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
+# Initialize extensions
+db.init_app(app)
+Migrate(app, db)
 
-
-    # Set configurations
-    app.config.from_object(config_class)
-
-    # Initialize extensions
-    db.init_app(app)
-    Migrate(app, db)
-
-    # Register Blueprints
-    # app.register_blueprint(user_bp)
-    app.register_blueprint(arrangements_bp)
-    app.register_blueprint(employee_bp)
-    app.register_blueprint(team_view_bp)
-    app.register_blueprint(apply_bp)
-
-    return app
+# Register Blueprints
+app.register_blueprint(arrangements_bp)
+app.register_blueprint(employee_bp)
+app.register_blueprint(team_view_bp)
+app.register_blueprint(apply_bp)
 
 if __name__ == '__main__':
-    app = create_app()
     app.run(debug=True)
