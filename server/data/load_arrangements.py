@@ -1,20 +1,7 @@
 from extensions import db
 from datetime import datetime, timedelta
 from models.arrangement import Arrangement
-# from arrangement import Arrangement
-from app import create_app  
-
-# export PYTHONPATH=$PYTHONPATH:/Users/joelsng/Documents/GitHub/all-in-one-fullstack/server
-
-# This file will load test arrangements for a user. this user has been created for testing purposes only
-# staff_id = 210045 with reporting_manager 130002
-# Mon - WFH Approved
-# Tue - WFH Rejected
-# Wed - WFH Pending
-# Thu - 
-# Fri - 
-# It also creates arrangements for 2 other staff id, 210001 and 180001
-# Their arrangements are in the same order, approved, rejected, pending, but for tue wed thu and wed thu fri respectively
+from app import app  # Directly import app from app.py
 
 # Constants for staff and approving manager
 STAFF_ID_1 = 210045
@@ -26,7 +13,7 @@ def populate_work_arrangements():
     try:
         # Get the current date and calculate the dates for the current week's Monday to Friday
         today = datetime.now()
-        monday = today - timedelta(days=today.weekday())  # Get the most recent Monday
+        monday = today - timedelta(days=today.weekday())
         tuesday = monday + timedelta(days=1)
         wednesday = monday + timedelta(days=2)
         thursday = monday + timedelta(days=3)
@@ -44,7 +31,7 @@ def populate_work_arrangements():
 
         thursday_application = thursday - timedelta(days=3)
 
-        # Create work arrangements for STAFF_ID_1 (Original User)
+        # Create work arrangements for STAFF_ID_1
         work_arrangements_staff_1 = [
             Arrangement(
                 Staff_ID=STAFF_ID_1,
@@ -71,7 +58,7 @@ def populate_work_arrangements():
                 Arrangement_Date=wednesday,
                 Status='Pending',
                 Application_Date=wednesday_application,
-                Approval_Date=None  # No approval date since it's pending
+                Approval_Date=None
             )
         ]
 
@@ -102,7 +89,7 @@ def populate_work_arrangements():
                 Arrangement_Date=thursday,
                 Status='Pending',
                 Application_Date=thursday_application,
-                Approval_Date=None  # No approval date since it's pending
+                Approval_Date=None
             )
         ]
 
@@ -124,7 +111,7 @@ def populate_work_arrangements():
                 Arrangement_Date=thursday,
                 Status='Rejected',
                 Application_Date=thursday_application,
-                Approval_Date=None  # No approval date since it's rejected
+                Approval_Date=None
             ),
             Arrangement(
                 Staff_ID=STAFF_ID_3,
@@ -133,7 +120,7 @@ def populate_work_arrangements():
                 Arrangement_Date=friday,
                 Status='Pending',
                 Application_Date=thursday_application,
-                Approval_Date=None  # No approval date since it's pending
+                Approval_Date=None
             )
         ]
 
@@ -153,9 +140,6 @@ def populate_work_arrangements():
         print(f"Error while populating work arrangements: {str(e)}")
 
 if __name__ == "__main__":
-    # Create the app instance using the factory pattern
-    app = create_app()
-
-    # Wrap the code in the Flask app context
+    # Use the app context directly
     with app.app_context():
         populate_work_arrangements()
