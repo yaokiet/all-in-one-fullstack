@@ -11,6 +11,7 @@ from controllers.apply_controller import apply_bp
 # Create the app at the global level so Vercel can recognize it
 app = Flask(__name__)
 CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
+CORS(app, supports_credentials=True, origins=["https://all-in-one-fullstack-4uz8.vercel.app"])
 
 # Set configurations
 app.config.from_object(DevelopmentConfig)
