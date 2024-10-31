@@ -1,11 +1,7 @@
-# from flask import Blueprint, jsonify, request, abort, session
-from flask import Blueprint, abort, session
-from flask import current_app as app, request, jsonify
+from flask import Blueprint, jsonify, request, abort, session
 from extensions import db
 from models.employee import Employee
 from models.arrangement import Arrangement
-import datetime
-import jwt
 from functools import wraps
 
 employee_bp = Blueprint('employee', __name__)
@@ -28,82 +24,17 @@ def get_employee_by_staff_id(staff_id):
     # Assuming User model has a serialize() method to convert object to JSON
     return jsonify(employee.serialize())
 
-# ORIGINAL LOGIN
-# @employee_bp.route('/login', methods=['POST'])
-# def login():
-#     # Get JSON data from the request
-#     try: 
-#         data = request.get_json()
-        
-#         if not data or not data.get('email') or not data.get('password'):
-#             return jsonify({
-#                 'code': 400, 
-#                 'message':"Email and password are required"
-#                 }), 400
-        
-#         email = data['email']
-#         password = data['password']
-        
-#         # Query the database for the user by email
-#         employee = Employee.query.filter_by(Email=email).first()
-        
-#         if not employee:
-#             return jsonify({
-#                 'code': 400, 
-#                 'message':"Employee not found"
-#                 }),400
-
-#         if password != "tieguanyin":
-#             return jsonify({
-#                 'code': 400, 
-#                 'message':"Incorrect password"
-#             })
-        
-#         session['employee_email'] = employee.Email  
-#         session['reporting_manager'] = employee.Reporting_Manager
-#         session['employee_id'] = employee.Staff_ID
-#         session['role'] = employee.Role
-#         session['position'] = employee.Position
-#         session['logged_in'] = True
-#         session['staff_fname'] = employee.Staff_FName
-#         session['staff_lname'] = employee.Staff_LName
-#         session.permanent = True 
-
-
-#         return jsonify({
-#             'message': 'Login successful',
-#             'code' : 200,
-#             'employee': employee.serialize(),
-#             'session': {
-#                 'role': session['role'],
-#                 'employee_email': session['employee_email'],
-#                 'employee_id': session['employee_id'],
-#                 'logged_in': session['logged_in'],
-#             }  
-#         })
-
-#     except Exception as e:
-#         return jsonify({
-#             'code': 500, 
-#            'message': str(e)
-#             })
-
-#     return jsonify({
-#         "code": 400,
-#         "message": "Invalid JSON input: " + str(request.get_data())
-#     }), 400
-
 @employee_bp.route('/login', methods=['POST'])
 def login():
+    # Get JSON data from the request
     try: 
-        # Get JSON data from the request
         data = request.get_json()
         
         if not data or not data.get('email') or not data.get('password'):
             return jsonify({
                 'code': 400, 
-                'message': "Email and password are required"
-            }), 400
+                'message':"Email and password are required"
+                }), 400
         
         email = data['email']
         password = data['password']
@@ -114,35 +45,48 @@ def login():
         if not employee:
             return jsonify({
                 'code': 400, 
-                'message': "Employee not found"
-            }), 400
+                'message':"Employee not found"
+                }),400
 
-        if password != "tieguanyin":  # Replace this with your secure password check logic
+        if password != "tieguanyin":
             return jsonify({
                 'code': 400, 
-                'message': "Incorrect password"
-            }), 400
+                'message':"Incorrect password"
+            })
         
-        # Generate JWT token with user information
-        token = jwt.encode({
-            'employee_id': employee.Staff_ID,
-            'role': employee.Role,
-            'email': employee.Email,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=1800)  # 30 minutes expiration
-        }, app.config['SECRET_KEY'], algorithm="HS256")
-        
+        session['employee_email'] = employee.Email  
+        session['reporting_manager'] = employee.Reporting_Manager
+        session['employee_id'] = employee.Staff_ID
+        session['role'] = employee.Role
+        session['position'] = employee.Position
+        session['logged_in'] = True
+        session['staff_fname'] = employee.Staff_FName
+        session['staff_lname'] = employee.Staff_LName
+        session.permanent = True 
+
+
         return jsonify({
             'message': 'Login successful',
-            'code': 200,
+            'code' : 200,
             'employee': employee.serialize(),
-            'token': token
-        }), 200
+            'session': {
+                'role': session['role'],
+                'employee_email': session['employee_email'],
+                'employee_id': session['employee_id'],
+                'logged_in': session['logged_in'],
+            }  
+        })
 
     except Exception as e:
         return jsonify({
             'code': 500, 
-            'message': str(e)
-        }), 500
+           'message': str(e)
+            })
+
+    return jsonify({
+        "code": 400,
+        "message": "Invalid JSON input: " + str(request.get_data())
+    }), 400
 
 @employee_bp.route('/logout', methods=['POST'])
 def logout():
@@ -168,92 +112,43 @@ def logout():
         "message": "Invalid JSON input: " + str(request.get_data())
     }), 400
 
-# @employee_bp.route('/auth', methods=['POST'])
-# def checkAuth():
-#     try:
-#         # Check if the user is logged in by checking the session
-#         if session.get('employee_id'):
-#             # User is authenticated, return the session info
-#             return jsonify({
-#                 'code': 200,
-#                 'message': 'User is authenticated',
-#                 'employee_id': session.get('employee_id'),
-#                 'employee_email': session.get('employee_email'),
-#                 'role': session.get('role'),
-#                 'position': session.get('position'),
-#                 'logged_in': session.get('logged_in'),
-#                 'staff_fname': session.get('staff_fname'),
-#                 'staff_lname': session.get('staff_lname'),
-#                 'reporting_manager': session.get('reporting_manager')
-#             })
-#         else:
-#             # No session or user is not logged in
-#             return jsonify({
-#                 'code': 401,
-#                 'message': 'User is not authenticated',
-#             })
-
-#     except Exception as e:
-#         # Handle any potential exceptions
-#         return jsonify({
-#             'code': 500, 
-#             'message': str(e)
-#         })
-
-#     # If the request fails validation or any other unknown error occurs
-#     return jsonify({
-#         'code': 400,
-#         'message': 'Bad request'
-#     }), 400
-
 @employee_bp.route('/auth', methods=['POST'])
 def checkAuth():
     try:
-        # Get the token from the Authorization header
-        token = None
-        if 'Authorization' in request.headers:
-            token = request.headers['Authorization'].split(" ")[1]  # Bearer token
-
-        if not token:
-            return jsonify({
-                'code': 401,
-                'message': 'User is not authenticated, token is missing'
-            }), 401
-
-        try:
-            # Decode and verify the token
-            decoded_data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
-
-            # If token is valid, return the user information
+        # Check if the user is logged in by checking the session
+        if session.get('employee_id'):
+            # User is authenticated, return the session info
             return jsonify({
                 'code': 200,
                 'message': 'User is authenticated',
-                'employee_id': decoded_data.get('employee_id'),
-                'employee_email': decoded_data.get('email'),
-                'role': decoded_data.get('role'),
-                # Add other fields if you included them in the JWT
-            }), 200
-
-        except jwt.ExpiredSignatureError:
-            # Token has expired
+                'employee_id': session.get('employee_id'),
+                'employee_email': session.get('employee_email'),
+                'role': session.get('role'),
+                'position': session.get('position'),
+                'logged_in': session.get('logged_in'),
+                'staff_fname': session.get('staff_fname'),
+                'staff_lname': session.get('staff_lname'),
+                'reporting_manager': session.get('reporting_manager')
+            })
+        else:
+            # No session or user is not logged in
             return jsonify({
                 'code': 401,
-                'message': 'Token has expired'
-            }), 401
-
-        except jwt.InvalidTokenError:
-            # Token is invalid
-            return jsonify({
-                'code': 401,
-                'message': 'Invalid token'
-            }), 401
+                'message': 'User is not authenticated',
+            })
 
     except Exception as e:
-        # Handle any unexpected exceptions
+        # Handle any potential exceptions
         return jsonify({
             'code': 500, 
             'message': str(e)
-        }), 500
+        })
+
+    # If the request fails validation or any other unknown error occurs
+    return jsonify({
+        'code': 400,
+        'message': 'Bad request'
+    }), 400
 
 # ///////////////////////////////////////////////////////////////////////////////////////////////////
 
