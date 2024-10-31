@@ -6,6 +6,7 @@ from models.employee import Employee
 from models.arrangement import Arrangement
 import datetime
 import jwt
+from functools import wraps
 
 employee_bp = Blueprint('employee', __name__)
 
@@ -167,45 +168,92 @@ def logout():
         "message": "Invalid JSON input: " + str(request.get_data())
     }), 400
 
+# @employee_bp.route('/auth', methods=['POST'])
+# def checkAuth():
+#     try:
+#         # Check if the user is logged in by checking the session
+#         if session.get('employee_id'):
+#             # User is authenticated, return the session info
+#             return jsonify({
+#                 'code': 200,
+#                 'message': 'User is authenticated',
+#                 'employee_id': session.get('employee_id'),
+#                 'employee_email': session.get('employee_email'),
+#                 'role': session.get('role'),
+#                 'position': session.get('position'),
+#                 'logged_in': session.get('logged_in'),
+#                 'staff_fname': session.get('staff_fname'),
+#                 'staff_lname': session.get('staff_lname'),
+#                 'reporting_manager': session.get('reporting_manager')
+#             })
+#         else:
+#             # No session or user is not logged in
+#             return jsonify({
+#                 'code': 401,
+#                 'message': 'User is not authenticated',
+#             })
+
+#     except Exception as e:
+#         # Handle any potential exceptions
+#         return jsonify({
+#             'code': 500, 
+#             'message': str(e)
+#         })
+
+#     # If the request fails validation or any other unknown error occurs
+#     return jsonify({
+#         'code': 400,
+#         'message': 'Bad request'
+#     }), 400
+
 @employee_bp.route('/auth', methods=['POST'])
 def checkAuth():
     try:
-        # Check if the user is logged in by checking the session
-        if session.get('employee_id'):
-            # User is authenticated, return the session info
+        # Get the token from the Authorization header
+        token = None
+        if 'Authorization' in request.headers:
+            token = request.headers['Authorization'].split(" ")[1]  # Bearer token
+
+        if not token:
+            return jsonify({
+                'code': 401,
+                'message': 'User is not authenticated, token is missing'
+            }), 401
+
+        try:
+            # Decode and verify the token
+            decoded_data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+
+            # If token is valid, return the user information
             return jsonify({
                 'code': 200,
                 'message': 'User is authenticated',
-                'employee_id': session.get('employee_id'),
-                'employee_email': session.get('employee_email'),
-                'role': session.get('role'),
-                'position': session.get('position'),
-                'logged_in': session.get('logged_in'),
-                'staff_fname': session.get('staff_fname'),
-                'staff_lname': session.get('staff_lname'),
-                'reporting_manager': session.get('reporting_manager')
-            })
-        else:
-            # No session or user is not logged in
+                'employee_id': decoded_data.get('employee_id'),
+                'employee_email': decoded_data.get('email'),
+                'role': decoded_data.get('role'),
+                # Add other fields if you included them in the JWT
+            }), 200
+
+        except jwt.ExpiredSignatureError:
+            # Token has expired
             return jsonify({
                 'code': 401,
-                'message': 'User is not authenticated',
-            })
+                'message': 'Token has expired'
+            }), 401
+
+        except jwt.InvalidTokenError:
+            # Token is invalid
+            return jsonify({
+                'code': 401,
+                'message': 'Invalid token'
+            }), 401
 
     except Exception as e:
-        # Handle any potential exceptions
+        # Handle any unexpected exceptions
         return jsonify({
             'code': 500, 
             'message': str(e)
-        })
-
-    # If the request fails validation or any other unknown error occurs
-    return jsonify({
-        'code': 400,
-        'message': 'Bad request'
-    }), 400
-
-
+        }), 500
 
 # ///////////////////////////////////////////////////////////////////////////////////////////////////
 
