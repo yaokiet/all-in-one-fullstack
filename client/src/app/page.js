@@ -6,6 +6,8 @@ import Sidebar from "@/components/sidebar";
 import ScheduleView from "@/components/OwnSchedule/scheduleView";
 import WFHApplicationForm from "@/components/ApplyforWFH/applyWFH"; // Import the WFH form
 import OverallView from "@/components/ViewOverallSchedule/overallSchedule";
+import TeamsView from "@/components/ViewTeamSchedules/teamCard";
+import AllView from "@/components/ViewAllSchedules/allSchedules";
 
 export default function OwnSchedule() {
   const formatDate = useCallback((date) => {
@@ -312,6 +314,26 @@ export default function OwnSchedule() {
               setViewMode={setViewMode}
             />
           )}
+          {activeNav === "View Team Members' Schedules" && (
+            <TeamsView
+                currentDate={currentDate}
+                viewMode={viewMode}
+                navigate={navigate}
+                returnToCurrent={returnToCurrent}
+                setViewMode={setViewMode}
+            />
+          )}
+          {activeNav === "View All Schedules" && (
+            <AllView
+                currentDate={currentDate}
+                viewMode={viewMode}
+                navigate={navigate}
+                returnToCurrent={returnToCurrent}
+                setViewMode={setViewMode}
+            />
+          )}
+            
+
         </div>
       </div>
     </div>

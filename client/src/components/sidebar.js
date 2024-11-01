@@ -33,6 +33,26 @@ const Sidebar = ({ activeNav, setActiveNav }) => (
       >
         View Overall Schedule
       </li>
+      <li
+        className={`cursor-pointer p-4 rounded mt-2 ${
+          activeNav === "View Team Members' Schedules"
+            ? "bg-blue-500 text-white"
+            : "hover:bg-gray-300"
+        }`}
+        onClick={() => setActiveNav("View Team Members' Schedules")}
+      >
+        View Team Members' Schedules
+      </li>
+      <li
+        className={`cursor-pointer p-4 rounded mt-2 ${
+          activeNav === "View All Schedules"
+            ? "bg-blue-500 text-white"
+            : "hover:bg-gray-300"
+        }`}
+        onClick={() => setActiveNav("View All Schedules")}
+      >
+        View All Schedules
+      </li>
     </ul>
   </nav>
 );
