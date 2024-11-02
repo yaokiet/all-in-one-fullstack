@@ -7,9 +7,8 @@ from controllers.arrangement_controller import arrangements_bp
 from controllers.employee_controller import employee_bp
 from controllers.team_view_controller import team_view_bp
 from controllers.apply_controller import apply_bp
+from controllers.manager_controller import manager_bp
 from utils.scheduler import start_scheduler  
-
-
 
 
 def create_app(config_class = DevelopmentConfig):
@@ -31,6 +30,7 @@ def create_app(config_class = DevelopmentConfig):
     app.register_blueprint(employee_bp)
     app.register_blueprint(team_view_bp)
     app.register_blueprint(apply_bp)
+    app.register_blueprint(manager_bp)
 
     return app
 

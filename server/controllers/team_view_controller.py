@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify, session
 from models.employee import Employee
 from models.arrangement import Arrangement
 from datetime import datetime, timedelta
+from sqlalchemy import and_
+
 import requests
 
 # Create a new Blueprint for team view-related routes
@@ -26,14 +28,19 @@ def team_members():
         }),404
         
     reporting_manager_id = employee.Reporting_Manager
+    position = employee.Position
     
     if not reporting_manager_id:
         return jsonify({
             "error":"This employee does not have a reporting manager"
         }), 404
     
-    team_members = Employee.query.filter_by(Reporting_Manager = reporting_manager_id).all()
-    
+    team_members = Employee.query.filter(
+        and_(
+            Employee.Reporting_Manager == reporting_manager_id,
+            Employee.Position == position
+        )
+    ).all()    
     if not team_members:
         return jsonify({
             "message":"No team members found for this manager"
@@ -46,6 +53,7 @@ def team_members():
         "team_size":len(result)
     }),200
 
+# references a user's reporting manager
 @team_view_bp.route('/team_arrangements_with_count', methods=['GET'])
 def team_arrangements_with_count():
     staff_id = session.get('employee_id')
@@ -123,17 +131,19 @@ def team_arrangements_with_count():
             for arrangement in arrangements:
                 arrangement_date = arrangement['arrangement_date']
                 arrangement_type = arrangement['arrangement_type']
+                arrangement_status = arrangement['status']
 
                 if arrangement_date in daily_data:
                     # If WFH, adjust the counts and arrangements accordingly
-                    if arrangement_type == 'WFH':
+                    if (arrangement_type == 'WFH' and arrangement_status == 'Approved'):
                         daily_data[arrangement_date]['wfh_count'] += 1
                         daily_data[arrangement_date]['in_office_count'] -= 1
 
                     # Add the member's arrangement to the daily schedule
                     daily_data[arrangement_date]['schedules'].append({
                         'member_id': member['staff_id'],
-                        'arrangement': arrangement_type
+                        'arrangement': arrangement_type,
+                        'arrangement_status': arrangement_status
                     })
 
             # Collate the member's arrangement for the full range
@@ -149,3 +159,4 @@ def team_arrangements_with_count():
     }
 
     return jsonify(response), 200
+
