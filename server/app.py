@@ -8,7 +8,7 @@ from controllers.employee_controller import employee_bp
 from controllers.team_view_controller import team_view_bp
 from controllers.apply_controller import apply_bp
 from controllers.manager_controller import manager_bp
-from utils.scheduler import start_scheduler  
+# from utils.scheduler import start_scheduler  
 
 migrate = Migrate()
 
@@ -16,7 +16,7 @@ def create_app(config_class = DevelopmentConfig):
     app = Flask(__name__)
     CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
 
-    start_scheduler()
+    # start_scheduler()
 
     # Set configurations
     app.config.from_object(DevelopmentConfig)
