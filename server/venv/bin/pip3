@@ -1,4 +1,4 @@
-#!/Users/YewKit/Documents/SPMDev/server/venv/bin/python3.12
+#!/Users/joelsng/Documents/GitHub/all-in-one-fullstack/server/venv/bin/python3.10
 # -*- coding: utf-8 -*-
 import re
 import sys
