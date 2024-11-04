@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from extensions import db
-# from flask_migrate import Migrate
+from flask_migrate import Migrate
 from config import DevelopmentConfig, TestingConfig
 from controllers.arrangement_controller import arrangements_bp
 from controllers.employee_controller import employee_bp
@@ -35,7 +35,7 @@ def create_app(config_class = DevelopmentConfig):
     # Initialize extensions
     db.init_app(app)
     sess.init_app(app)  # Link session management with the app
-    # migrate.init_app(app, db)  # Link Migrate with app and db
+    migrate = Migrate(app, db)  # Add this line to initialize Flask-Migrate
 
     # Register Blueprints
     # app.register_blueprint(user_bp)

@@ -14,15 +14,12 @@ from config import TestingConfig
 def client():
     # Set up Flask test client and application context
     app = create_app(TestingConfig)
-    # app.config['TESTING'] = True
-    # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'  # In-memory database for testing
-
     with app.test_client() as client:
         with app.app_context():
-            db.create_all()  # Create the test tables
+            db.create_all()  # Create the test tables if they don't exist
             yield client
-            db.session.remove()  # Clean up the database session
-            db.drop_all()  # Drop the test tables after tests are done
+            db.session.rollback()  # Rollback any changes made during tests to avoid unintended data persistence
+
 
 def create_dummy_employee():
     # Create a dummy employee

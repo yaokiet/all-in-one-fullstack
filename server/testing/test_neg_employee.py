@@ -9,14 +9,12 @@ from config import TestingConfig
 def client():
     # Set up Flask test client and application context
     app = create_app(TestingConfig)
-
     with app.test_client() as client:
         with app.app_context():
-            db.create_all()  # Create the test tables
-        yield client
+            db.create_all()  # Create the test tables if they don't exist
+            yield client
+            db.session.rollback()  # Rollback any changes made during tests to avoid unintended data persistence
 
-        with app.app_context():
-            db.drop_all()  # Drop the test tables after tests are done
 
 def test_neg_fetch_nonexistent_employee(client: FlaskClient):
     # Attempt to fetch an employee with a non-existent staff_id
