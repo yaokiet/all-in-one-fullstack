@@ -94,7 +94,7 @@ def create_work_arrangement():
     }), 201
     
 # This route is to update the status of a work arrangement (from Pending to Approved or Rejected)
-@arrangements_bp.route('/arrangements/<int:arrangement_id>', methods=['PATCH'])
+@arrangements_bp.route('/arrangements/<int:arrangement_id>', methods=['PUT'])
 def update_work_arrangement_status(arrangement_id):
     data = request.get_json()
 

@@ -104,7 +104,8 @@ def apply_arrangement():
                 Arrangement_Date=arrangement_date,
                 Status='Pending',  # Default status
                 Application_Date=application_date,
-                Reason=reason
+                Reason=reason,
+                Manager_Reason = ""
             )
             arrangements.append(new_arrangement)
             db.session.add(new_arrangement)
@@ -148,12 +149,15 @@ def delete_arrangement(arrangement_id):
 @apply_bp.route('/apply/manager', methods=['GET'])
 def manager_view_arrangements():
     try:
+        # Get the staff ID from the session to verify the user is logged in
         staff_id = session.get('employee_id')
         if not staff_id:
             return jsonify({'code': 403, 'message': 'You must be logged in.'}), 403
 
+        # Get the filter type from the request's query parameters
         filter_type = request.args.get('filter')
 
+        # Query the arrangements based on the filter type
         if filter_type == 'pending':
             arrangements = Arrangement.query.filter(
                 Arrangement.Approving_ID == staff_id,
@@ -170,15 +174,29 @@ def manager_view_arrangements():
                 Arrangement.Status == 'Rejected'
             ).all()
         else:
-            return jsonify({'code': 400, 'message': 'Invalid filter type. Use "upcoming" or "past".'}), 400
+            return jsonify({'code': 400, 'message': 'Invalid filter type. Use "pending", "approved", or "rejected".'}), 400
 
-        # Return arrangements with employee name included
+        # For each arrangement, retrieve the associated employee details
+        arrangements_with_employee = []
+        for arr in arrangements:
+            # Fetch employee details based on the staff ID in each arrangement
+            employee = Employee.query.filter_by(Staff_ID=arr.Staff_ID).first()
+            
+            # Serialize the arrangement and add employee details
+            arrangement_data = arr.serialize()
+            if employee:
+                arrangement_data['fullname'] = employee.Staff_FName + " " + employee.Staff_LName
+
+            arrangements_with_employee.append(arrangement_data)
+
+        # Return the arrangements with added employee information
         return jsonify({
             'code': 200,
-            'arrangements': [arr.serialize() for arr in arrangements]
+            'arrangements': arrangements_with_employee
         }), 200
 
     except Exception as e:
+        # Handle any exceptions and return a 500 status code
         return jsonify({'code': 500, 'message': str(e)}), 500
 
 
@@ -212,6 +230,8 @@ def approve_arrangement():
 
         # Update the status
         arrangement.Status = new_status
+        arrangement.Manager_Reason = manager_reason
+
         db.session.commit()
 
         return jsonify({
