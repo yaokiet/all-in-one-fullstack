@@ -13,7 +13,7 @@ import git
 import hmac
 import hashlib
 import os
-from dotenv import load_dotenv
+from datetime import timedelta
 
 # migrate = Migrate()
 sess = Session()
@@ -42,6 +42,8 @@ def create_app(config_class=DevelopmentConfig):
     # app.secret_key = 'your_secret_key'  # Ensure this is set for session security
     app.config['SESSION_COOKIE_SAMESITE'] = 'None'
     app.config['SESSION_COOKIE_SECURE'] = False
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)  # Adjust as necessary
+
     
     # app.config['SESSION_TYPE'] = 'filesystem'  # Change to 'null' or 'filesystem' if you want to use server-side sessions, but not recommended in serverless
     # app.config['SESSION_USE_SIGNER'] = True  # Sign cookies for security
