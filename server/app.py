@@ -36,12 +36,18 @@ def create_app(config_class=DevelopmentConfig):
 
     # Set configurations
     app.config['SESSION_TYPE'] = 'filesystem'  # Switch to filesystem-based sessions
-    app.config['SESSION_FILE_DIR'] = '/tmp/flask_session/'  # Set directory for session files
-    app.config['SESSION_PERMANENT'] = False
+    # app.config['SESSION_FILE_DIR'] = '/tmp/flask_session/'  # Set directory for session files
+    # app.config['SESSION_PERMANENT'] = False
     app.config['SESSION_USE_SIGNER'] = True
-    app.secret_key = 'your_secret_key'  # Ensure this is set for session security
+    # app.secret_key = 'your_secret_key'  # Ensure this is set for session security
     app.config['SESSION_COOKIE_SAMESITE'] = 'None'
     app.config['SESSION_COOKIE_SECURE'] = False
+    
+    # app.config['SESSION_TYPE'] = 'filesystem'  # Change to 'null' or 'filesystem' if you want to use server-side sessions, but not recommended in serverless
+    # app.config['SESSION_USE_SIGNER'] = True  # Sign cookies for security
+    # app.config['SESSION_COOKIE_SAMESITE'] = 'None'  # Allows cross-origin cookies
+    # app.config['SESSION_COOKIE_SECURE'] = True  # Ensure this is True when using HTTPS in production
+
 
 
 
