@@ -130,15 +130,16 @@ def test_create_work_arrangement(client):
 def test_update_work_arrangement_status(client):
     # Step 1: Create a manager using the POST /employees route
     manager_data = {
-        "staff_fname": "Manager",
+        "staff_fname": "Manager2",
         "staff_lname": "Test",
         "dept": "Engineering",
         "position": "Manager",
         "country": "USA",
-        "email": "manager@example.com",
+        "email": "manager2@example.com",
         "role": 1
     }
     response = client.post('/employees', json=manager_data)
+    print(response.get_json())  # Print the error details
     assert response.status_code == 201
     manager = response.get_json()['employee']
 
