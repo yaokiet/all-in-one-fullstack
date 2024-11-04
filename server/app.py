@@ -15,7 +15,6 @@ import hashlib
 import os
 from dotenv import load_dotenv
 
-# migrate = Migrate()
 sess = Session()
 
 def create_app(config_class=DevelopmentConfig):
@@ -35,25 +34,18 @@ def create_app(config_class=DevelopmentConfig):
     app.config.from_object(config_class)
 
     # Set configurations
-    # app.config['SESSION_TYPE'] = 'filesystem'  # Switch to filesystem-based sessions
-    # app.config['SESSION_FILE_DIR'] = '/tmp/flask_session/'  # Set directory for session files
-    # app.config['SESSION_PERMANENT'] = False
-    # app.config['SESSION_USE_SIGNER'] = False
-    # app.secret_key = 'your_secret_key'  # Ensure this is set for session security
-    # app.config['SESSION_COOKIE_SAMESITE'] = 'None'
-    # app.config['SESSION_COOKIE_SECURE'] = False
     app.config['SESSION_TYPE'] = 'filesystem'  # Switch to filesystem-based sessions
     app.config['SESSION_FILE_DIR'] = '/tmp/flask_session/'  # Set directory for session files
     app.config['SESSION_PERMANENT'] = False
     app.config['SESSION_USE_SIGNER'] = False
     app.secret_key = 'your_secret_key'  # Ensure this is set for session security
-    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Adjust for local development
-    app.config['SESSION_COOKIE_SECURE'] = True  # Set to False for local development
+    app.config['SESSION_COOKIE_SAMESITE'] = 'None'
+    app.config['SESSION_COOKIE_SECURE'] = True
 
 
     # Initialize extensions
     db.init_app(app)
-    # sess.init_app(app)  # Link session management with the app
+    sess.init_app(app)  # Link session management with the app
     migrate = Migrate(app, db)  # Add this line to initialize Flask-Migrate
 
     # Register Blueprints
