@@ -10,6 +10,7 @@ from controllers.apply_controller import apply_bp
 from controllers.manager_controller import manager_bp
 from utils.scheduler import start_scheduler  
 
+migrate = Migrate()
 
 def create_app(config_class = DevelopmentConfig):
     app = Flask(__name__)
@@ -22,7 +23,7 @@ def create_app(config_class = DevelopmentConfig):
 
     # Initialize extensions
     db.init_app(app)
-    Migrate(app, db)
+    migrate.init_app(app, db)  # Link Migrate with app and db
 
     # Register Blueprints
     # app.register_blueprint(user_bp)
@@ -31,6 +32,9 @@ def create_app(config_class = DevelopmentConfig):
     app.register_blueprint(team_view_bp)
     app.register_blueprint(apply_bp)
     app.register_blueprint(manager_bp)
+    
+    return app
 
 if __name__ == '__main__':
+    app = create_app()
     app.run(debug=True)
