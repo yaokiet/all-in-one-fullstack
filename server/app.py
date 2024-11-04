@@ -44,15 +44,6 @@ def create_app(config_class=DevelopmentConfig):
     app.config['SESSION_COOKIE_SECURE'] = False
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)  # Adjust as necessary
 
-    
-    # app.config['SESSION_TYPE'] = 'filesystem'  # Change to 'null' or 'filesystem' if you want to use server-side sessions, but not recommended in serverless
-    # app.config['SESSION_USE_SIGNER'] = True  # Sign cookies for security
-    # app.config['SESSION_COOKIE_SAMESITE'] = 'None'  # Allows cross-origin cookies
-    # app.config['SESSION_COOKIE_SECURE'] = True  # Ensure this is True when using HTTPS in production
-
-
-
-
     # Initialize extensions
     db.init_app(app)
     sess.init_app(app)  # Link session management with the app
