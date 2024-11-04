@@ -12,34 +12,36 @@ from config import TestingConfig
 
 @pytest.fixture
 def client():
-    # Set up Flask test client and application context
     app = create_app(TestingConfig)
     with app.test_client() as client:
         with app.app_context():
-            db.create_all()  # Create the test tables if they don't exist
-            yield client
-            db.session.rollback()  # Rollback any changes made during tests to avoid unintended data persistence
+            db.drop_all()  # Drop all tables to ensure no data persistence
+            db.create_all()  # Recreate tables fresh
+        yield client
+        with app.app_context():
+            db.drop_all()  # Clean up after each test
 
-
-def create_dummy_employee():
-    # Create a dummy employee
-    employee = Employee(
-        Staff_FName="John",
-        Staff_LName="Doe",
-        Dept="Engineering",
-        Position="Software Engineer",
-        Country="USA",
-        Email="john.doe@example.com",
-        Role=1
-    )
-    db.session.add(employee)
-    db.session.commit()
-    return employee.Staff_ID  # Return the Staff_ID for foreign key use
+# Adjust `create_dummy_employee` to use `client` for context
+def create_dummy_employee(client):
+    with client.application.app_context():  # Use the context from the client
+        # Create a dummy employee
+        employee = Employee(
+            Staff_FName="John",
+            Staff_LName="Doe",
+            Dept="Engineering",
+            Position="Software Engineer",
+            Country="USA",
+            Email="john.doe@example.com",
+            Role=1
+        )
+        db.session.add(employee)
+        db.session.commit()
+        return employee.Staff_ID  # Return the Staff_ID for foreign key use
 
 
 def test_view_own_arrangements_in_date_range(client):
     # Step 1: Create a dummy employee to satisfy foreign key constraints
-    staff_id = create_dummy_employee()
+    staff_id = create_dummy_employee(client)
 
     # Step 2: Create some work arrangements with specific dates
     today = date.today()
@@ -73,8 +75,10 @@ def test_view_own_arrangements_in_date_range(client):
         Approval_Date=datetime.now()
     )
 
-    db.session.add_all([arrangement1, arrangement2, arrangement3])
-    db.session.commit()
+    # Use client.application.app_context() to ensure application context
+    with client.application.app_context():
+        db.session.add_all([arrangement1, arrangement2, arrangement3])
+        db.session.commit()
 
     # Step 3: Make a GET request with a specific date range
     start_date = (today - timedelta(days=5)).strftime('%Y-%m-%d')  # 5 days ago
@@ -94,7 +98,7 @@ def test_view_own_arrangements_in_date_range(client):
 
 def test_create_work_arrangement(client):
     # Step 1: Create a dummy employee to satisfy foreign key constraints
-    staff_id = create_dummy_employee()
+    staff_id = create_dummy_employee(client)
     
     # Step 2: Prepare the work arrangement data
     arrangement_data = {
@@ -130,12 +134,12 @@ def test_create_work_arrangement(client):
 def test_update_work_arrangement_status(client):
     # Step 1: Create a manager using the POST /employees route
     manager_data = {
-        "staff_fname": "Manager2",
+        "staff_fname": "Manager",
         "staff_lname": "Test",
         "dept": "Engineering",
         "position": "Manager",
         "country": "USA",
-        "email": "manager2@example.com",
+        "email": "manager@example.com",
         "role": 1
     }
     response = client.post('/employees', json=manager_data)

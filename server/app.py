@@ -14,12 +14,12 @@ from flask_session import Session
 # migrate = Migrate()
 sess = Session()
 
-def create_app(config_class = DevelopmentConfig):
+def create_app(config_class=DevelopmentConfig):
     app = Flask(__name__)
     CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
 
     # Set configurations
-    app.config.from_object(DevelopmentConfig)
+    app.config.from_object(config_class)
 
     # Set configurations
     app.config['SESSION_TYPE'] = 'filesystem'  # Switch to filesystem-based sessions

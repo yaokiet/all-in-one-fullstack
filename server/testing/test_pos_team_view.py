@@ -14,13 +14,14 @@ from flask import session
 
 @pytest.fixture
 def client():
-    # Set up Flask test client and application context
     app = create_app(TestingConfig)
     with app.test_client() as client:
         with app.app_context():
-            db.create_all()  # Create the test tables if they don't exist
-            yield client
-            db.session.rollback()  # Rollback any changes made during tests to avoid unintended data persistence
+            db.drop_all()  # Drop all tables to ensure no data persistence
+            db.create_all()  # Recreate tables fresh
+        yield client
+        with app.app_context():
+            db.drop_all()  # Clean up after each test
 
 
 def create_dummy_employee(client, email, staff_fname="John", staff_lname="Doe", manager_id=None):
