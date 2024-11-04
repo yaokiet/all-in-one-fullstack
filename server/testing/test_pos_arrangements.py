@@ -173,7 +173,7 @@ def test_update_work_arrangement_status(client):
     update_data = {
         "status": "Approved"
     }
-    response = client.patch(f'/arrangements/{arrangement["arrangement_id"]}', json=update_data)
+    response = client.put(f'/arrangements/{arrangement["arrangement_id"]}', json=update_data)  # Use PUT instead of PATCH
     assert response.status_code == 200
     updated_arrangement = response.get_json()['arrangement']
 

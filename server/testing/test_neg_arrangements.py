@@ -98,8 +98,8 @@ def test_update_arrangement_invalid_status(client):
     update_data = {
         "status": "InvalidStatus"
     }
-    response = client.patch(f'/arrangements/{arrangement["arrangement_id"]}', json=update_data)
-    assert response.status_code == 400
+    response = client.put(f'/arrangements/{arrangement["arrangement_id"]}', json=update_data)
+    assert response.status_code == 400  # Adjusted to 400 based on your error code
     assert "Invalid status" in response.get_json()['message']
 
 def test_update_arrangement_missing_status(client):
@@ -115,6 +115,6 @@ def test_update_arrangement_missing_status(client):
     arrangement = response.get_json()['arrangement']
 
     # Step 2: Attempt to update arrangement without providing a status
-    response = client.patch(f'/arrangements/{arrangement["arrangement_id"]}', json={})
-    assert response.status_code == 400
+    response = client.put(f'/arrangements/{arrangement["arrangement_id"]}', json={})
+    assert response.status_code == 400  # Adjusted to 400 based on your error code
     assert "Status is required" in response.get_json()['message']
