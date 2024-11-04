@@ -24,7 +24,9 @@ def create_app(config_class=DevelopmentConfig):
     # Add your additional origin here
     allowed_origins = [
         "http://localhost:3000",
-        "https://frontend-git-master-yew-kiys-projects.vercel.app"  # Add your new origin
+        "https://frontend-git-master-yew-kiys-projects.vercel.app",
+        "https://all-in-one-fullstack-4uz8.vercel.app",
+        "https://frontend-yew-kiys-projects.vercel.app"
     ]
     # CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
     CORS(app, supports_credentials=True, origins=allowed_origins)
