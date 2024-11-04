@@ -17,12 +17,12 @@ def create_app(config_class = DevelopmentConfig):
 
     start_scheduler()
 
-# Set configurations
-app.config.from_object(DevelopmentConfig)
+    # Set configurations
+    app.config.from_object(DevelopmentConfig)
 
-# Initialize extensions
-db.init_app(app)
-Migrate(app, db)
+    # Initialize extensions
+    db.init_app(app)
+    Migrate(app, db)
 
     # Register Blueprints
     # app.register_blueprint(user_bp)
