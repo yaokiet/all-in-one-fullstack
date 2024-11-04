@@ -1,8 +1,8 @@
-"""Recreate deleted tables
+"""Initial migration
 
-Revision ID: f0dd244d7999
-Revises: 05cca5306484
-Create Date: 2024-09-21 22:33:19.799165
+Revision ID: 1ae2b9e4a614
+Revises: 
+Create Date: 2024-11-04 13:40:21.262832
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'f0dd244d7999'
-down_revision = '05cca5306484'
+revision = '1ae2b9e4a614'
+down_revision = None
 branch_labels = None
 depends_on = None
 
@@ -31,15 +31,6 @@ def upgrade():
     sa.ForeignKeyConstraint(['Reporting_Manager'], ['employees.Staff_ID'], ),
     sa.PrimaryKeyConstraint('Staff_ID')
     )
-    op.create_table('users',
-    sa.Column('Staff_ID', sa.Integer(), nullable=False),
-    sa.Column('Staff_FName', sa.String(length=50), nullable=False),
-    sa.Column('Email', sa.String(length=120), nullable=False),
-    sa.Column('Role', sa.Integer(), nullable=False),
-    sa.PrimaryKeyConstraint('Staff_ID'),
-    sa.UniqueConstraint('Email'),
-    sa.UniqueConstraint('Staff_FName')
-    )
     op.create_table('work_arrangements',
     sa.Column('Arrangement_ID', sa.Integer(), nullable=False),
     sa.Column('Staff_ID', sa.Integer(), nullable=False),
@@ -49,6 +40,8 @@ def upgrade():
     sa.Column('Status', sa.String(length=20), nullable=False),
     sa.Column('Application_Date', sa.DateTime(), nullable=False),
     sa.Column('Approval_Date', sa.DateTime(), nullable=True),
+    sa.Column('Reason', sa.String(length=255), nullable=True),
+    sa.Column('Manager_Reason', sa.String(length=255), nullable=True),
     sa.ForeignKeyConstraint(['Approving_ID'], ['employees.Staff_ID'], ),
     sa.ForeignKeyConstraint(['Staff_ID'], ['employees.Staff_ID'], ),
     sa.PrimaryKeyConstraint('Arrangement_ID')
@@ -67,6 +60,5 @@ def downgrade():
         batch_op.drop_index(batch_op.f('ix_work_arrangements_Approving_ID'))
 
     op.drop_table('work_arrangements')
-    op.drop_table('users')
     op.drop_table('employees')
     # ### end Alembic commands ###
