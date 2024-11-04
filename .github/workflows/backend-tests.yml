@@ -25,8 +25,8 @@ jobs:
           cd server
           pip install -r requirements.txt
 
-      # - name: Set PYTHONPATH
-      #   run: echo "PYTHONPATH=$PYTHONPATH:$GITHUB_WORKSPACE/server" >> $GITHUB_ENV
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=$PYTHONPATH:$GITHUB_WORKSPACE/server" >> $GITHUB_ENV
 
       - name: Run pytest
         run: |
