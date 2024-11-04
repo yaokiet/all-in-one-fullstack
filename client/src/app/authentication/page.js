@@ -110,7 +110,7 @@ export default function LoginPage() {
               src="/logo_large.png"
               alt="Logo"
               width={500} // specify both width and height, or use fill
-              height={auto}
+              height='auto'
               priority // set priority for above-the-fold images
             />
           </div>
@@ -119,7 +119,7 @@ export default function LoginPage() {
               src="/title.png"
               alt="All in One"
               width={200}
-              height={auto}
+              height='auto'
               priority
             />
 
