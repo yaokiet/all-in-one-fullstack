@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Modal from '@/components/modal';
+import { Router } from 'lucide-react';
 
 export default function ManageArrangement() {
   const [arrangements, setArrangements] = useState([]);
@@ -58,7 +59,7 @@ export default function ManageArrangement() {
   useEffect(() => {
     // Simulating API call
     setArrangements(dummyArrangements);
-  }, []);
+  }, [Router]);
 
   const handleWithdraw = (arrangement) => {
     setSelectedArrangement(arrangement);

@@ -45,7 +45,7 @@ const Sidebar = ({ activeNav, setActiveNav, role }) => (
             }`}
             onClick={() => setActiveNav("View Team Members' Schedules")}
           >
-            View Team Members' Schedules
+            View Team Members&apos; Schedules
           </li>
 
           <li
