@@ -144,6 +144,90 @@ def delete_arrangement(arrangement_id):
     except Exception as e:
         return jsonify({'code': 500, 'message': str(e)}), 500
 
+#  Get all applications from manager POV, can filter based on status
+@apply_bp.route('/apply/manager', methods=['GET'])
+def manager_view_arrangements():
+    try:
+        staff_id = session.get('employee_id')
+        if not staff_id:
+            return jsonify({'code': 403, 'message': 'You must be logged in.'}), 403
+
+        filter_type = request.args.get('filter')
+
+        if filter_type == 'pending':
+            arrangements = Arrangement.query.filter(
+                Arrangement.Approving_ID == staff_id,
+                Arrangement.Status == 'Pending'
+            ).all()
+        elif filter_type == 'approved':
+            arrangements = Arrangement.query.filter(
+                Arrangement.Approving_ID == staff_id,
+                Arrangement.Status == 'Approved'
+            ).all()
+        elif filter_type == 'rejected':
+            arrangements = Arrangement.query.filter(
+                Arrangement.Approving_ID == staff_id,
+                Arrangement.Status == 'Rejected'
+            ).all()
+        else:
+            return jsonify({'code': 400, 'message': 'Invalid filter type. Use "upcoming" or "past".'}), 400
+
+        # Return arrangements with employee name included
+        return jsonify({
+            'code': 200,
+            'arrangements': [arr.serialize() for arr in arrangements]
+        }), 200
+
+    except Exception as e:
+        return jsonify({'code': 500, 'message': str(e)}), 500
+
+
+@apply_bp.route('/apply/manager', methods=['PUT'])
+def approve_arrangement():
+    try:
+        data = request.get_json()
+
+        # Check if arrangement_id and status are provided in the request
+        if not data or not data.get('arrangement_id') or not data.get('status'):
+            return jsonify({
+                'code': 400,
+                'message': 'Arrangement ID and new status are required.'
+            }), 400
+
+        arrangement_id = data['arrangement_id']
+        new_status = data['status']
+        manager_reason = data['manager_reason']
+
+        # Retrieve the arrangement
+        arrangement = Arrangement.query.filter(
+            Arrangement.Arrangement_ID == arrangement_id
+            ).first()
+
+        # Check if the arrangement exists and belongs to the logged-in manager
+        if not arrangement:
+            return jsonify({
+                'code': 404,
+                'message': 'Arrangement not found or you do not have permission to update it.'
+            }), 404
+
+        # Update the status
+        arrangement.Status = new_status
+        db.session.commit()
+
+        return jsonify({
+            'code': 200,
+            'message': 'Arrangement status updated successfully.',
+            'manger_reason' : manager_reason,
+            'arrangement': arrangement.serialize()
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            'code': 500,
+            'message': str(e)
+        }), 500
+
+
 
 
 def get_employee_name(staff_id):
