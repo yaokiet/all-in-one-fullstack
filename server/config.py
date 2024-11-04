@@ -23,7 +23,7 @@ class DevelopmentConfig(Config):
 
 class TestingConfig(Config):
     """Testing config."""
-    # SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'  # In-memory database for testing
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///test_database.db'  # In-memory database for testing
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'  # In-memory database for testing
+    # SQLALCHEMY_DATABASE_URI = 'sqlite:///test_database.db'  # In-memory database for testing
     TESTING = True
     DEBUG = True
