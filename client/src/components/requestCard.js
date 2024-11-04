@@ -72,16 +72,27 @@ export default function RequestCard({
             {request.status}
           </span>
         </div>
-        <div className="flex items-center space-x-6 text-base text-gray-600">
-          <div className="flex items-center">
+        <div className="space-y-2">
+          <div className="flex items-center text-gray-600">
             <CalendarDays className="mr-2 h-5 w-5 text-gray-400" />
-            <span>{request.arrangement_date}</span>
+            <span className="mr-2">{request.arrangement_date}</span>
           </div>
 
-          <div className="flex items-center">
+          <div className="flex items-center text-gray-600 ">
             <User className="mr-2 h-5 w-5 text-gray-400" />
             <span>{superviserName}</span>
           </div>
+
+          <div className="flex items-center text-gray-600 ">
+            <span className="mr-2">📝</span>{" "}
+            <span>Reason: {request.reason} </span>
+          </div>
+          {(request.status == "rejected") && (
+            <div className="flex items-center text-red-600">
+              <span className="mr-2">❌</span>
+              <span>Rejection Reason: {request.rejectionReason}</span>
+            </div>
+          )}
         </div>
       </div>
       <div className="bg-gray-50 px-6 py-3 flex justify-end space-x-3">
