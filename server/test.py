@@ -7,7 +7,7 @@ app = Flask(__name__)
 @app.route('/test')
 def test():
     # Print 'hello world' in the server console
-    print('hello worldadslkffadsnkfjdnasnjklfads')
+    print('hello ggg')
     # Return a simple response to the client
     return 'Hello, World!'
 
