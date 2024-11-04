@@ -58,6 +58,9 @@ def create_app(config_class=DevelopmentConfig):
     app.register_blueprint(apply_bp)
     app.register_blueprint(manager_bp)
 
+# asd
+# asd
+# sad
     # # Ensure Access-Control-Allow-Credentials is set
     # @app.after_request
     # def apply_cors(response):
