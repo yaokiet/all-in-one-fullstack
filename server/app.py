@@ -48,7 +48,7 @@ def create_app(config_class=DevelopmentConfig):
     app.config['SESSION_USE_SIGNER'] = False
     app.secret_key = 'your_secret_key'  # Ensure this is set for session security
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Adjust for local development
-    app.config['SESSION_COOKIE_SECURE'] = False  # Set to False for local development
+    app.config['SESSION_COOKIE_SECURE'] = True  # Set to False for local development
 
 
     # Initialize extensions
