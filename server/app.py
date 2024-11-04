@@ -58,15 +58,15 @@ def create_app(config_class=DevelopmentConfig):
     app.register_blueprint(apply_bp)
     app.register_blueprint(manager_bp)
 
-    # Ensure Access-Control-Allow-Credentials is set
-    @app.after_request
-    def apply_cors(response):
-        # response.headers["Access-Control-Allow-Origin"] = "http://localhost:3000"
-        response.headers["Access-Control-Allow-Origin"] = ",".join(allowed_origins)
-        response.headers["Access-Control-Allow-Credentials"] = "true"
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
-        response.headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS"
-        return response
+    # # Ensure Access-Control-Allow-Credentials is set
+    # @app.after_request
+    # def apply_cors(response):
+    #     # response.headers["Access-Control-Allow-Origin"] = "http://localhost:3000"
+    #     response.headers["Access-Control-Allow-Origin"] = ",".join(allowed_origins)
+    #     response.headers["Access-Control-Allow-Credentials"] = "true"
+    #     response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
+    #     response.headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS"
+    #     return response
 
     # Webhook route
     @app.route('/update_server', methods=['POST'])
