@@ -16,7 +16,7 @@ import os
 from dotenv import load_dotenv
 
 # migrate = Migrate()
-# sess = Session()
+sess = Session()
 
 def create_app(config_class=DevelopmentConfig):
     app = Flask(__name__)
@@ -42,7 +42,13 @@ def create_app(config_class=DevelopmentConfig):
     # app.secret_key = 'your_secret_key'  # Ensure this is set for session security
     # app.config['SESSION_COOKIE_SAMESITE'] = 'None'
     # app.config['SESSION_COOKIE_SECURE'] = False
-
+    app.config['SESSION_TYPE'] = 'filesystem'  # Switch to filesystem-based sessions
+    app.config['SESSION_FILE_DIR'] = '/tmp/flask_session/'  # Set directory for session files
+    app.config['SESSION_PERMANENT'] = False
+    app.config['SESSION_USE_SIGNER'] = False
+    app.secret_key = 'your_secret_key'  # Ensure this is set for session security
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Adjust for local development
+    app.config['SESSION_COOKIE_SECURE'] = False  # Set to False for local development
 
 
     # Initialize extensions
@@ -57,19 +63,6 @@ def create_app(config_class=DevelopmentConfig):
     app.register_blueprint(team_view_bp)
     app.register_blueprint(apply_bp)
     app.register_blueprint(manager_bp)
-
-# asd
-# asd
-# sad
-    # # Ensure Access-Control-Allow-Credentials is set
-    # @app.after_request
-    # def apply_cors(response):
-    #     # response.headers["Access-Control-Allow-Origin"] = "http://localhost:3000"
-    #     response.headers["Access-Control-Allow-Origin"] = ",".join(allowed_origins)
-    #     response.headers["Access-Control-Allow-Credentials"] = "true"
-    #     response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
-    #     response.headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS"
-    #     return response
 
     # Webhook route
     @app.route('/update_server', methods=['POST'])
