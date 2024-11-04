@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request, abort, session
 from extensions import db
 from models.employee import Employee
 from models.arrangement import Arrangement
+from functools import wraps
 
 employee_bp = Blueprint('employee', __name__)
 
@@ -22,7 +23,6 @@ def get_employee_by_staff_id(staff_id):
     
     # Assuming User model has a serialize() method to convert object to JSON
     return jsonify(employee.serialize())
-
 
 @employee_bp.route('/login', methods=['POST'])
 def login():
@@ -149,8 +149,6 @@ def checkAuth():
         'code': 400,
         'message': 'Bad request'
     }), 400
-
-
 
 # ///////////////////////////////////////////////////////////////////////////////////////////////////
 

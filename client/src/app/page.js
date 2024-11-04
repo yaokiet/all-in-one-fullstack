@@ -6,6 +6,12 @@ import Sidebar from "@/components/sidebar";
 import ScheduleView from "@/components/OwnSchedule/scheduleView";
 import WFHApplicationForm from "@/components/ApplyforWFH/applyWFH"; // Import the WFH form
 import OverallView from "@/components/ViewOverallSchedule/overallSchedule";
+import TeamsView from "@/components/ViewTeamSchedules/teamCard";
+import AllView from "@/components/ViewAllSchedules/allSchedules";
+import ManagerWFHRequests from "@/components/ManageWFH/ManagerWFHRequests";
+import ManageArrangement from "@/components/ManageWFH/ManageArrangement";
+import { useRouter } from "next/navigation";
+import axios from "axios";
 
 export default function OwnSchedule() {
   const formatDate = useCallback((date) => {
@@ -31,6 +37,10 @@ export default function OwnSchedule() {
     userid: 210045,
     role: "Software Developer",
   });
+  const [username, setUsername] = useState("");
+  const router = useRouter();
+  const [role, setRole] = useState("");
+  const [position, setPosition] = useState("");
   const [activeNav, setActiveNav] = useState("View own schedule");
 
   const [currentDate, setCurrentDate] = useState(() =>
@@ -74,6 +84,36 @@ export default function OwnSchedule() {
       setMaxRecurringWeeks(wfhForm.date);
     }
   }, [wfhForm.date, setMaxRecurringWeeks]);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_SERVER_URL}/auth`,
+          {},
+          {
+            withCredentials: true,
+          }
+        );
+        if (response.data.code === 200) {
+          console.log(response.data);
+          setUsername(
+            response.data.staff_fname + " " + response.data.staff_lname
+          );
+          setPosition(response.data.position);
+          setRole(response.data.role);
+        } else {
+          console.log("error with auth", response.data);
+          router.push("/authentication");
+        }
+      } catch (error) {
+        console.error("Authentication check failed:", error);
+        router.push("/authentication");
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   const generateSchedule = useCallback(
     (date, mode) => {
@@ -268,9 +308,13 @@ export default function OwnSchedule() {
 
   return (
     <div className="flex flex-col h-screen">
-      <Navbar user={user} />
+      <Navbar username={username} position={position} role={role} />
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar activeNav={activeNav} setActiveNav={setActiveNav} />
+        <Sidebar
+          activeNav={activeNav}
+          setActiveNav={setActiveNav}
+          role={role}
+        />
         <div className="flex-1 p-4 overflow-auto">
           {isLoading && (
             <div className="bg-blue-100 text-blue-800 p-4 rounded-md mb-4">
@@ -305,6 +349,31 @@ export default function OwnSchedule() {
 
           {activeNav === "View Overall Schedule" && (
             <OverallView
+              currentDate={currentDate}
+              viewMode={viewMode}
+              navigate={navigate}
+              returnToCurrent={returnToCurrent}
+              setViewMode={setViewMode}
+            />
+          )}
+
+          {activeNav === "Manage WFH Requests" && (
+            <ManagerWFHRequests teamSize={10} />
+          )}
+
+          {activeNav === "Manage Arrangements" && <ManageArrangement />}
+
+          {activeNav === "View Team Members' Schedules" && (
+            <TeamsView
+              currentDate={currentDate}
+              viewMode={viewMode}
+              navigate={navigate}
+              returnToCurrent={returnToCurrent}
+              setViewMode={setViewMode}
+            />
+          )}
+          {activeNav === "View All Schedules" && (
+            <AllView
               currentDate={currentDate}
               viewMode={viewMode}
               navigate={navigate}

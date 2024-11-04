@@ -1,13 +1,8 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarDays, User } from "lucide-react";
-import Modal from "../components/modal"; // Import the Modal component
-
-export default function RequestCard({
-  request,
-  superviserName,
-  setDeleteSignal,
-}) {
+import Modal from "../modal";
+export default function ManageCard({ request }) {
   const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
 
   const getStatusColor = (status) => {
@@ -80,7 +75,7 @@ export default function RequestCard({
 
           <div className="flex items-center text-gray-600 ">
             <User className="mr-2 h-5 w-5 text-gray-400" />
-            <span>{superviserName}</span>
+            <span>{request.fullname}</span>
           </div>
 
           <div className="flex items-center text-gray-600 ">
@@ -97,14 +92,31 @@ export default function RequestCard({
       </div>
       <div className="bg-gray-50 px-6 py-3 flex justify-end space-x-3">
         {/* Conditionally render the Withdraw Request button if the status is NOT 'approved' */}
-        {request.status.toLowerCase() !== "approved" && (
+        {request.status.toLowerCase() !== "pending" && (
           <button
             onClick={handleWithdraw}
             type="button"
             className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
           >
-            Withdraw Request
+            Delete Request
           </button>
+        )}
+
+        {request.status.toLowerCase() === "pending" && (
+          <>
+            <button
+              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              onClick={() => handleApprove(request.id)}
+            >
+              Approve
+            </button>
+            <button
+              className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+              onClick={() => handleReject(request.id)}
+            >
+              Reject
+            </button>
+          </>
         )}
       </div>
 

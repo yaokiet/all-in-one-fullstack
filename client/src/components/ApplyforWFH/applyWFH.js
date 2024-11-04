@@ -28,6 +28,7 @@ export default function ApplyWFH() {
         if (response.ok) {
           setRequests(data.arrangements);
           setSuperviserName(data.manager_name);
+          
           console.log(data);
         } else {
           console.error("Failed to fetch data:", data.message);
