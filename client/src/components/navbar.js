@@ -7,11 +7,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-const Navbar = () => {
-  const [username, setUsername] = useState("");
-  const [role, setRole] = useState("");
-  const [position, setPosition] = useState("");
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+const Navbar = ({ username, position, role }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const router = useRouter();
@@ -35,9 +31,6 @@ const Navbar = () => {
 
       if (response.data.code === 200) {
         console.log("Logged out successfully");
-        setIsAuthenticated(false);
-        setUsername("");
-        setRole("");
         router.push("/authentication");
       } else {
         console.log("Error logging out:", response.data);
@@ -46,36 +39,6 @@ const Navbar = () => {
       console.error("Logout failed:", error);
     }
   };
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_SERVER_URL}/auth`,
-          {},
-          {
-            withCredentials: true,
-          }
-        );
-        if (response.data.code === 200) {
-          console.log(response.data);
-          setIsAuthenticated(true);
-          setUsername(
-            response.data.staff_fname + " " + response.data.staff_lname
-          );
-          setPosition(response.data.position);
-        } else {
-          console.log("error with auth", response.data);
-          router.push("/authentication");
-        }
-      } catch (error) {
-        console.error("Authentication check failed:", error);
-        router.push("/authentication");
-      }
-    };
-
-    checkAuth();
-  }, []);
 
   return (
     <nav className="bg-blue-500 h-20 w-full text-white flex justify-center">
@@ -90,31 +53,30 @@ const Navbar = () => {
           layout="intrinsic" // or layout="responsive"
           className=""
         />
-        {isAuthenticated && (
-          <div className="">
-            <button
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center space-x-2 focus:outline-none"
-            >
-              <div className="text-right">
-                <p className="font-semibold">{username}</p>
-                <p className="text-sm">{position}</p>
-              </div>
-              <ChevronDown className="w-4 h-4" />
-            </button>
-            {isDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
-                <button
-                  onClick={handleLogout}
-                  className=" px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left flex items-center"
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Log out
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+
+        <div className="">
+          <button
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="flex items-center space-x-2 focus:outline-none"
+          >
+            <div className="text-right">
+              <p className="font-semibold">{username}</p>
+              <p className="text-sm">{position}</p>
+            </div>
+            <ChevronDown className="w-4 h-4" />
+          </button>
+          {isDropdownOpen && (
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+              <button
+                onClick={handleLogout}
+                className=" px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left flex items-center"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Log out
+              </button>
+            </div>
+          )}
+        </div>
       </div>
       <Modal
         isOpen={isLogoutModalOpen}

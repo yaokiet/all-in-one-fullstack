@@ -32,5 +32,8 @@ def create_app(config_class = DevelopmentConfig):
     app.register_blueprint(apply_bp)
     app.register_blueprint(manager_bp)
 
+    return app
+
 if __name__ == '__main__':
+    app = create_app()
     app.run(debug=True)
