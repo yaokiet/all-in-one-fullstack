@@ -17,7 +17,7 @@ sess = Session()
 def create_app(config_class = DevelopmentConfig):
     app = Flask(__name__)
     # CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
-    CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}})
+    CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
 
     # Set configurations
     app.config.from_object(DevelopmentConfig)
@@ -29,7 +29,7 @@ def create_app(config_class = DevelopmentConfig):
     app.config['SESSION_USE_SIGNER'] = True
     app.secret_key = 'your_secret_key'  # Ensure this is set for session security
     app.config['SESSION_COOKIE_SAMESITE'] = 'None'
-    app.config['SESSION_COOKIE_SECURE'] = True
+    app.config['SESSION_COOKIE_SECURE'] = False
 
 
 

@@ -3,8 +3,16 @@ from models.employee import Employee
 from models.arrangement import Arrangement
 from datetime import datetime, timedelta
 from sqlalchemy import and_
+from dotenv import load_dotenv
+import os
 
 import requests
+
+# Load environment variables
+load_dotenv()
+
+# Get the production URL from the environment variable
+PRODUCTION_URL = os.getenv('PRODUCTION_URL', 'http://localhost:5000')
 
 # Create a new Blueprint for team view-related routes
 team_view_bp = Blueprint('team_view', __name__)
@@ -83,7 +91,7 @@ def team_arrangements_with_count():
         }), 400
 
     # Step 2: Call /team_members API to get the team members
-    team_members_url = f'http://localhost:5000/team_members'
+    team_members_url = f'{PRODUCTION_URL}/team_members'
     session_cookie = request.cookies.get('session')  # Get the session cookie from the original request
     headers = {'Cookie': f'session={session_cookie}'}  # Set the session cookie in the header
     team_members_response = requests.get(team_members_url, headers=headers)
@@ -122,7 +130,7 @@ def team_arrangements_with_count():
         member_id = member['staff_id']
         
         # Fetch the arrangements for each team member
-        arrangements_url = f'http://localhost:5000/arrangements?staff_id={member_id}&start_date={start_date.strftime("%Y-%m-%d")}&end_date={end_date.strftime("%Y-%m-%d")}'
+        arrangements_url = f'{PRODUCTION_URL}/arrangements?staff_id={member_id}&start_date={start_date.strftime("%Y-%m-%d")}&end_date={end_date.strftime("%Y-%m-%d")}'
         arrangements_response = requests.get(arrangements_url)
 
         if arrangements_response.status_code == 200:
