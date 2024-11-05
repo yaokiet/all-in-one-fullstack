@@ -179,22 +179,41 @@ def manager_subordinate_groups():
         if position not in grouped_subordinates:
             grouped_subordinates[position] = {
                 'total_count': 0,
-                'in_office_count': 0
+                'in_office_count': 0,
+                'AM_in_office': 0,
+                'PM_in_office': 0
             }
-        
+
         # Increment total count for the position
         grouped_subordinates[position]['total_count'] += 1
 
-        # Count approved WFH arrangements for the member on today's date
+        # Set default assumption: in-office for both AM and PM
+        is_in_office_am = True
+        is_in_office_pm = True
+
+        # Retrieve today's WFH arrangements for this member
         wfh_arrangements_today = Arrangement.query.filter_by(
             Staff_ID=member.Staff_ID,
             Status="Approved",
             Arrangement_Date=today,
             Arrangement_Type="WFH"
-        ).count()
+        ).all()
 
-        # Calculate in-office count based on WFH arrangements
-        if wfh_arrangements_today == 0:  # If no WFH, the member is in-office
+        # Check each arrangement's AM_PM field to adjust in-office counts
+        for arrangement in wfh_arrangements_today:
+            if arrangement.AM_PM == "AM":
+                is_in_office_am = False
+            elif arrangement.AM_PM == "PM":
+                is_in_office_pm = False
+
+        # Update in-office counts based on the arrangements
+        if is_in_office_am:
+            grouped_subordinates[position]['AM_in_office'] += 1
+        if is_in_office_pm:
+            grouped_subordinates[position]['PM_in_office'] += 1
+
+        # If the member is in-office for both AM and PM, increment total in-office count
+        if is_in_office_am and is_in_office_pm:
             grouped_subordinates[position]['in_office_count'] += 1
 
     # Prepare the final result structure
@@ -203,7 +222,9 @@ def manager_subordinate_groups():
             {
                 "position": position,
                 "total_count": group['total_count'],
-                "in_office_count": group['in_office_count']
+                "in_office_count": group['in_office_count'],
+                "AM_in_office": group['AM_in_office'],
+                "PM_in_office": group['PM_in_office']
             }
             for position, group in grouped_subordinates.items()
         ]
@@ -211,9 +232,9 @@ def manager_subordinate_groups():
 
     return jsonify(result), 200
 
+
 @manager_bp.route('/manager_all_departments', methods=['GET'])
 def manager_all_departments():
-
     # Fetch all employees
     all_employees = Employee.query.all()
 
@@ -221,7 +242,7 @@ def manager_all_departments():
         return jsonify({"message": "No employees found"}), 200
 
     # Get today's date
-    today = datetime.today()
+    today = datetime.today().date()
 
     # Group employees by department
     grouped_departments = {}
@@ -230,22 +251,35 @@ def manager_all_departments():
         if department not in grouped_departments:
             grouped_departments[department] = {
                 'total_count': 0,
-                'in_office_count': 0
+                'AM_in_office': 0,
+                'PM_in_office': 0
             }
         
-        # Increment total count
+        # Increment total count for the department
         grouped_departments[department]['total_count'] += 1
         
-        # Check how many approved arrangements exist for today
-        approved_arrangements_today = Arrangement.query.filter(
-            Arrangement.Approving_ID == member.Staff_ID,
-            Arrangement.Status == "Approved",
-            Arrangement.Arrangement_Date == today
-        ).count()
+        # Retrieve approved WFH arrangements for the member on today's date
+        arrangements_today = Arrangement.query.filter_by(
+            Staff_ID=member.Staff_ID,
+            Status="Approved",
+            Arrangement_Date=today
+        ).all()
 
-        # Deduct the approved arrangements from the total to determine the in-office count
-        in_office_count = grouped_departments[department]['total_count'] - approved_arrangements_today
-        grouped_departments[department]['in_office_count'] = max(0, in_office_count)
+        # Calculate in-office counts for AM and PM
+        in_office_am = True  # Assume in-office unless arrangement says otherwise
+        in_office_pm = True  # Assume in-office unless arrangement says otherwise
+        
+        for arrangement in arrangements_today:
+            if arrangement.AM_PM == "AM":
+                in_office_am = False
+            elif arrangement.AM_PM == "PM":
+                in_office_pm = False
+        
+        # Update in-office counts based on arrangement times
+        if in_office_am:
+            grouped_departments[department]['AM_in_office'] += 1
+        if in_office_pm:
+            grouped_departments[department]['PM_in_office'] += 1
 
     # Prepare the final result structure
     result = {
@@ -253,7 +287,8 @@ def manager_all_departments():
             {
                 "department": department,
                 "total_count": group['total_count'],
-                "in_office_count": group['in_office_count']
+                "AM_in_office": group['AM_in_office'],
+                "PM_in_office": group['PM_in_office']
             }
             for department, group in grouped_departments.items()
         ]

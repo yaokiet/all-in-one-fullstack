@@ -7,24 +7,20 @@ import ManagerTeam from "./ManagerTeam";
 
 export default function ManagerHolder({ currentDate, role }) {
   const [pageState, setPageState] = useState("");
-  const [position, setPosition] = useState("Account Manager");
+  const [position, setPosition] = useState("");
   const [department, setDepartment] = useState("Sales");
 
   // Set initial page state based on role
   useEffect(() => {
     if (role === 1) {
-      setPageState("team");
+      setPageState("department");
     } else if (role === 3) {
-      setPageState("manager");
+      setPageState("teamList");
     }
   }, [role]);
 
-  const handleBackClick = () => {
-    setPageState("");
-  };
-
   return (
-    <div className="rounded-lg shadow-md container mx-auto p-5">
+    <div>
       {/* Conditionally render components based on pageState */}
 
       {pageState === "team" && (
@@ -41,6 +37,7 @@ export default function ManagerHolder({ currentDate, role }) {
           setPosition={setPosition}
           setPageState={setPageState}
           department={department}
+          role={role}
         />
       )}
 

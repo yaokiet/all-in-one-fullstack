@@ -64,6 +64,7 @@ def apply_arrangement():
         arrangement_dates = data['arrangement_dates']
         reason = data['reason']
         arrangement_type = data['arrangement_type']
+        am_pm = data['am_pm']
         staff_id = session.get('employee_id')
         approving_id = session.get('reporting_manager')
 
@@ -106,7 +107,8 @@ def apply_arrangement():
                 Status='Pending',  # Default status
                 Application_Date=application_date,
                 Reason=reason,
-                Manager_Reason = ""
+                Manager_Reason = "",
+                AM_PM = am_pm
             )
             arrangements.append(new_arrangement)
             db.session.add(new_arrangement)

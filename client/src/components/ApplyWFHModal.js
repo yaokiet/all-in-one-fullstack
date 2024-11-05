@@ -62,6 +62,7 @@ export default function ApplyWFHModal({ isOpen, onClose, setRequestSignal }) {
       arrangement_dates: newSelectedDates,
       arrangement_type: "WFH",
       reason: reason,
+      am_pm: session,
     };
 
     try {
