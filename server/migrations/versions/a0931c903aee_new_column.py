@@ -1,8 +1,8 @@
-"""added am pm column
+"""new column
 
-Revision ID: 6cfbdddb656e
+Revision ID: a0931c903aee
 Revises: 
-Create Date: 2024-11-05 09:31:35.519218
+Create Date: 2024-11-06 00:06:25.864371
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '6cfbdddb656e'
+revision = 'a0931c903aee'
 down_revision = None
 branch_labels = None
 depends_on = None

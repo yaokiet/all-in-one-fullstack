@@ -25,7 +25,9 @@ def create_app(config_class=DevelopmentConfig):
         "http://localhost:3000",
         "https://frontend-git-master-yew-kiys-projects.vercel.app",
         "https://frontend-yew-kiys-projects.vercel.app",
-        "https://all-in-one-fullstack-4uz8.vercel.app"
+        "https://all-in-one-fullstack-4uz8.vercel.app",
+        "https://jszw00.pythonanywhere.com",
+        "http://localhost:5000"
     ]
     # CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
     CORS(app, supports_credentials=True, origins=allowed_origins)
