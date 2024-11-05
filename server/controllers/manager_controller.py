@@ -4,9 +4,15 @@ from models.arrangement import Arrangement
 from datetime import datetime, timedelta
 from sqlalchemy import and_
 import requests
+from dotenv import load_dotenv
 
 # Create a new Blueprint for team view-related routes
 manager_bp = Blueprint('manager', __name__)
+# Load environment variables
+load_dotenv()
+
+# Get the production URL from the environment variable
+PRODUCTION_URL = os.getenv('PRODUCTION_URL')
 
 @manager_bp.route('/manager_team_members', methods=['GET'])
 def manager_team():
@@ -74,7 +80,7 @@ def manager_arrangements_with_count():
 
     # Step 2: Determine the team members URL and filtering based on role
     
-    team_members_url = f'http://localhost:5000/manager_team_members?position={position}'
+    team_members_url = f'{PRODUCTION_URL}/manager_team_members?position={position}'
     
 
     session_cookie = request.cookies.get('session')
@@ -113,7 +119,7 @@ def manager_arrangements_with_count():
     collated_arrangements = []
     for member in team_members:
         member_id = member['staff_id']
-        arrangements_url = f'http://localhost:5000/arrangements?staff_id={member_id}&start_date={start_date.strftime("%Y-%m-%d")}&end_date={end_date.strftime("%Y-%m-%d")}'
+        arrangements_url = f'{PRODUCTION_URL}/arrangements?staff_id={member_id}&start_date={start_date.strftime("%Y-%m-%d")}&end_date={end_date.strftime("%Y-%m-%d")}'
         arrangements_response = requests.get(arrangements_url)
 
         if arrangements_response.status_code == 200:
