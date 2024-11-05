@@ -10,11 +10,6 @@ export default function TeamOverview({
   allTeamMembers,
 }) {
   const modalRef = useRef(null);
-  // console.log("Data received by TeamOverview, teamData:", teamData);
-  console.log(`Data received ${date} by TeamOverview, teamData:`,teamData)
-  console.log(`Data received ${date} by TeamOverview, allTeamMembers:`,allTeamMembers)
-  console.log(`Data received ${date} by TeamOverview, ampm:`,ampm)
-
   // Filter teamData based on AM or PM and create a WFH map
   const filteredTeamData = teamData.filter((entry) => entry.am_pm == ampm); // Filter by AM or PM
   const wfhMap = filteredTeamData.reduce((acc, member) => {

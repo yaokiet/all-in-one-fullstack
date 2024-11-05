@@ -131,6 +131,26 @@ def populate_work_arrangements():
                 Status='Approved',
                 Application_Date=thursday_application,
                 Approval_Date=None
+            ),
+            Arrangement(
+                Staff_ID=STAFF_ID_3,
+                Approving_ID=APPROVING_ID,
+                Arrangement_Type='WFH',
+                Arrangement_Date=tuesday,
+                AM_PM="PM",
+                Status='Approved',
+                Application_Date=thursday_application,
+                Approval_Date=None
+            ),
+            Arrangement(
+                Staff_ID=STAFF_ID_3,
+                Approving_ID=APPROVING_ID,
+                Arrangement_Type='WFH',
+                Arrangement_Date=monday,
+                AM_PM="PM",
+                Status='Approved',
+                Application_Date=thursday_application,
+                Approval_Date=None
             )
         ]
 

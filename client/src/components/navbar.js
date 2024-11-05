@@ -7,7 +7,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-const Navbar = ({ username, position, role }) => {
+const Navbar = ({ username, position, role, setActiveNav }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const router = useRouter();
@@ -51,7 +51,8 @@ const Navbar = ({ username, position, role }) => {
           height={0} // Set height to 0 to allow auto
           style={{ height: "auto" }} // Ensure height adjusts automatically
           layout="intrinsic" // or layout="responsive"
-          className=""
+          onClick={() => setActiveNav("View own schedule")} // Set to "View own schedule" on logo click
+          className="cursor-pointer"
         />
 
         <div className="">

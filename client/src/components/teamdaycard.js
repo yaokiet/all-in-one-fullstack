@@ -21,7 +21,6 @@ export default function TeamDayCard({ dayData, date, totalMembers, onClick }) {
             </div>
           )}
           <p className="font-semibold">{inOfficeCount} in office</p>
-          <p className="font-semibold">{wfhCount} WFH</p>
           <p className="text-sm text-gray-600">out of {totalMembers} members</p>
         </>
       ) : (

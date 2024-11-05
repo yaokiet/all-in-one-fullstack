@@ -310,7 +310,8 @@ export default function OwnSchedule() {
     <>
       {!isLoading && (
         <div className="flex flex-col h-screen">
-          <Navbar username={username} position={position} role={role} />
+          <Navbar username={username} position={position} role={role} setActiveNav={setActiveNav} // Pass setActiveNav to Navbar
+          />
           <div className="flex flex-1 overflow-hidden">
             <Sidebar
               activeNav={activeNav}

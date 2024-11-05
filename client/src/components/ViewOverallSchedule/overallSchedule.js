@@ -39,7 +39,7 @@ export default function OverallView({ currentDate }) {
         if (!response.ok) throw new Error("Failed to fetch team arrangements");
 
         const data = await response.json();
-        console.log("Raw data received:", data);
+        // console.log("Raw data received:", data);
 
         const totalMembers = data.team_members.length;  // Get total team size
         setTeamSize(totalMembers);
@@ -83,7 +83,7 @@ export default function OverallView({ currentDate }) {
     setSelectedTeamData(dayData?.team_schedules || []); // Ensure it uses AM/PM-specific schedules
     setModalOpen(true);
     setModalAMPM(ampm); // Set the correct AM or PM value
-    console.log(`Team overview data for ${date} (${ampm}):`, dayData); // Log dayData and ampm when clicked
+    // console.log(`Team overview data for ${date} (${ampm}):`, dayData); // Log dayData and ampm when clicked
   };
   
   const navigateWeek = (direction) => {
