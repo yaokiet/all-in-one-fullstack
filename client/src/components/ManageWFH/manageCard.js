@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 import { CalendarDays, User } from "lucide-react";
-import Modal from "../modal";
-export default function ManageCard({ request }) {
-  const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
+import ManageModal from "./manageModal";
+
+export default function ManageCard({ request, setSignal }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalType, setModalType] = useState("");
 
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
@@ -18,34 +19,9 @@ export default function ManageCard({ request }) {
     }
   };
 
-  const handleWithdraw = () => {
-    // Open the modal
+  const handleOpenModal = (type) => {
+    setModalType(type);
     setIsModalOpen(true);
-  };
-
-  const handleConfirmWithdraw = async () => {
-    // Log to check if the function is triggered
-    console.log("Withdrawal request initiated");
-
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/apply/${request.arrangement_id}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Request withdrawn successfully:", data);
-        setDeleteSignal(true);
-      } else {
-      }
-    } catch (error) {
-      console.error("Withdrawal failed:", error);
-    }
-    setIsModalOpen(false);
   };
 
   const handleCloseModal = () => {
@@ -72,17 +48,15 @@ export default function ManageCard({ request }) {
             <CalendarDays className="mr-2 h-5 w-5 text-gray-400" />
             <span className="mr-2">{request.arrangement_date}</span>
           </div>
-
-          <div className="flex items-center text-gray-600 ">
+          <div className="flex items-center text-gray-600">
             <User className="mr-2 h-5 w-5 text-gray-400" />
             <span>{request.fullname}</span>
           </div>
-
-          <div className="flex items-center text-gray-600 ">
-            <span className="mr-2">📝</span>{" "}
-            <span>Reason: {request.reason} </span>
+          <div className="flex items-center text-gray-600">
+            <span className="mr-2">📝</span>
+            <span>Reason: {request.reason}</span>
           </div>
-          {request.status == "Rejected" && (
+          {request.status === "Rejected" && (
             <div className="flex items-center text-red-600">
               <span className="mr-2">❌</span>
               <span>Rejection Reason: {request.manager_reason}</span>
@@ -91,28 +65,33 @@ export default function ManageCard({ request }) {
         </div>
       </div>
       <div className="bg-gray-50 px-6 py-3 flex justify-end space-x-3">
-        {/* Conditionally render the Withdraw Request button if the status is NOT 'approved' */}
         {request.status.toLowerCase() !== "pending" && (
           <button
-            onClick={handleWithdraw}
+            onClick={() => handleOpenModal("withdraw")}
             type="button"
             className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
           >
             Delete Request
           </button>
         )}
-
         {request.status.toLowerCase() === "pending" && (
           <>
             <button
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              onClick={() => handleApprove(request.id)}
+              className={`px-4 py-2 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                request.is_above_threshold
+                  ? "bg-gray-300 cursor-not-allowed focus:ring-gray-300"
+                  : "bg-blue-500 hover:bg-blue-600 focus:ring-blue-500"
+              }`}
+              onClick={() =>
+                !request.is_above_threshold && handleOpenModal("approve")
+              }
+              disabled={request.is_above_threshold}
             >
               Approve
             </button>
             <button
               className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-              onClick={() => handleReject(request.id)}
+              onClick={() => handleOpenModal("reject")}
             >
               Reject
             </button>
@@ -120,14 +99,17 @@ export default function ManageCard({ request }) {
         )}
       </div>
 
-      {/* Modal for confirming the withdrawal */}
-      <Modal
+      <ManageModal
+        setSignal={setSignal}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        onConfirm={handleConfirmWithdraw}
-        title="Confirm Withdrawal"
-        message="Are you sure you want to withdraw this request?"
-        buttonMessage="Withdraw"
+        type={modalType}
+        title={`Confirm ${
+          modalType.charAt(0).toUpperCase() + modalType.slice(1)
+        }`}
+        message={`Are you sure you want to ${modalType} this request?`}
+        buttonMessage={modalType.charAt(0).toUpperCase() + modalType.slice(1)}
+        requestId={request.arrangement_id}
       />
     </div>
   );

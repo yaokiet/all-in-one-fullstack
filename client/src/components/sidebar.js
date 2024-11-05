@@ -11,7 +11,7 @@ const Sidebar = ({ activeNav, setActiveNav, role }) => (
         }`}
         onClick={() => setActiveNav("View own schedule")}
       >
-        View own schedule
+        View My Schedule
       </li>
       <li
         className={`cursor-pointer p-4 rounded mt-2 ${
@@ -31,7 +31,7 @@ const Sidebar = ({ activeNav, setActiveNav, role }) => (
         }`}
         onClick={() => setActiveNav("View Overall Schedule")}
       >
-        View Overall Schedule
+        Own Team View
       </li>
 
       {/* Conditionally render based on role */}
@@ -45,18 +45,7 @@ const Sidebar = ({ activeNav, setActiveNav, role }) => (
             }`}
             onClick={() => setActiveNav("View Team Members' Schedules")}
           >
-            View Team Members' Schedules
-          </li>
-
-          <li
-            className={`cursor-pointer p-4 rounded mt-2 ${
-              activeNav === "View All Schedules"
-                ? "bg-blue-500 text-white"
-                : "hover:bg-gray-300"
-            }`}
-            onClick={() => setActiveNav("View All Schedules")}
-          >
-            View All Schedules
+            Manage View
           </li>
 
           <li
@@ -69,19 +58,9 @@ const Sidebar = ({ activeNav, setActiveNav, role }) => (
           >
             Manage WFH Requests
           </li>
+          
         </>
       )}
-
-      <li
-        className={`cursor-pointer p-4 rounded mt-2 ${
-          activeNav === "Manage Arrangements"
-            ? "bg-blue-500 text-white"
-            : "hover:bg-gray-300"
-        }`}
-        onClick={() => setActiveNav("Manage Arrangements")}
-      >
-        Manage Arrangements
-      </li>
     </ul>
   </nav>
 );

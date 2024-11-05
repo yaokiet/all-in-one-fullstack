@@ -3,6 +3,7 @@ from flask import Blueprint, request, jsonify, session
 from models.arrangement import Arrangement
 from datetime import datetime
 from extensions import db
+from utils.num_approved import num_approved
 
 apply_bp = Blueprint('apply', __name__)
 
@@ -134,9 +135,6 @@ def delete_arrangement(arrangement_id):
         if not arrangement:
             return jsonify({'code': 404, 'message': 'Arrangement not found'}), 404
 
-        if arrangement.Status == 'Approved':
-            return jsonify({'code': 403, 'message': 'Cannot delete an approved arrangement'}), 403
-
         db.session.delete(arrangement)
         db.session.commit()
 
@@ -181,13 +179,16 @@ def manager_view_arrangements():
         for arr in arrangements:
             # Fetch employee details based on the staff ID in each arrangement
             employee = Employee.query.filter_by(Staff_ID=arr.Staff_ID).first()
-            
+
             # Serialize the arrangement and add employee details
             arrangement_data = arr.serialize()
             if employee:
                 arrangement_data['fullname'] = employee.Staff_FName + " " + employee.Staff_LName
+                arrangement_data['is_above_threshold'] = num_approved(staff_id, arr.Arrangement_Date) 
+
 
             arrangements_with_employee.append(arrangement_data)
+                       
 
         # Return the arrangements with added employee information
         return jsonify({
