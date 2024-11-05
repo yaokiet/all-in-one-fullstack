@@ -58,7 +58,7 @@ def create_work_arrangement():
     data = request.get_json()
 
     # Validate that all required parameters are provided
-    required_fields = ['staff_id', 'approving_id', 'arrangement_type', 'arrangement_date']
+    required_fields = ['staff_id', 'approving_id', 'arrangement_type', 'arrangement_date', 'AM_PM']
     for field in required_fields:
         if field not in data:
             return jsonify({
@@ -73,6 +73,13 @@ def create_work_arrangement():
             'message': 'Invalid date format. Please use YYYY-MM-DD',
             'code': 400
         }), 400
+        
+    # Validate the AM_PM field
+    if data['AM_PM'] not in ["AM", "PM"]:
+        return jsonify({
+            'message': 'Invalid value for AM_PM. Please use "AM" or "PM"',
+            'code': 400
+        }), 400
 
     # Create the new work arrangement, defaulting status to 'Pending'
     new_arrangement = Arrangement(
@@ -80,6 +87,7 @@ def create_work_arrangement():
         Approving_ID=data['approving_id'],
         Arrangement_Type=data['arrangement_type'],
         Arrangement_Date=arrangement_date,
+        AM_PM = data['AM_PM'],
         Status='Pending',  # Default to 'Pending'
         Application_Date=datetime.now(),  # Automatically set application date to now
     )

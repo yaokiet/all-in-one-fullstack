@@ -38,7 +38,6 @@ def create_dummy_employee(client):
         db.session.commit()
         return employee.Staff_ID  # Return the Staff_ID for foreign key use
 
-
 def test_invalid_date_range(client):
     # Step 1: Create a dummy employee to satisfy foreign key constraints
     staff_id = create_dummy_employee(client)
@@ -58,12 +57,14 @@ def test_invalid_date_range(client):
     assert response_json['message'] == 'Invalid date range. Start Date cannot be after End Date.'
     assert response_json['code'] == 400
     
-def test_create_work_arrangement_missing_fields(client):
+@pytest.mark.parametrize("am_pm", ["AM", "PM"])
+def test_create_work_arrangement_missing_fields(client, am_pm):
     # Omit the 'arrangement_date' field
     arrangement_data = {
         "staff_id": create_dummy_employee(client),
         "approving_id": create_dummy_employee(client),
         "arrangement_type": "WFH",
+        "AM_PM": am_pm
         # Missing 'arrangement_date'
     }
     response = client.post('/arrangements', json=arrangement_data)
@@ -89,7 +90,8 @@ def test_update_arrangement_invalid_status(client):
         "staff_id": staff_id,
         "approving_id": staff_id,
         "arrangement_type": "WFH",
-        "arrangement_date": date.today().strftime('%Y-%m-%d')
+        "arrangement_date": date.today().strftime('%Y-%m-%d'),
+        "AM_PM": "AM"  # Fixed assignment of AM_PM
     }
     response = client.post('/arrangements', json=arrangement_data)
     arrangement = response.get_json()['arrangement']
@@ -109,7 +111,8 @@ def test_update_arrangement_missing_status(client):
         "staff_id": staff_id,
         "approving_id": staff_id,
         "arrangement_type": "WFH",
-        "arrangement_date": date.today().strftime('%Y-%m-%d')
+        "arrangement_date": date.today().strftime('%Y-%m-%d'),
+        "AM_PM": "AM"  # Fixed assignment of AM_PM
     }
     response = client.post('/arrangements', json=arrangement_data)
     arrangement = response.get_json()['arrangement']
@@ -118,3 +121,43 @@ def test_update_arrangement_missing_status(client):
     response = client.put(f'/arrangements/{arrangement["arrangement_id"]}', json={})
     assert response.status_code == 400  # Adjusted to 400 based on your error code
     assert "Status is required" in response.get_json()['message']
+
+def test_create_work_arrangement_missing_am_pm(client):
+    # Step 1: Create a dummy employee to satisfy foreign key constraints
+    staff_id = create_dummy_employee(client)
+
+    # Step 2: Prepare the work arrangement data without the AM_PM field
+    arrangement_data = {
+        "staff_id": staff_id,
+        "approving_id": staff_id,  # Self-approving for test purposes
+        "arrangement_type": "WFH",
+        "arrangement_date": date.today().strftime('%Y-%m-%d')
+    }
+    
+    # Step 3: Attempt to create the work arrangement without AM_PM
+    response = client.post('/arrangements', json=arrangement_data)
+    
+    # Step 4: Validate the response
+    assert response.status_code == 400  # Expecting a 400 Bad Request
+    assert "AM_PM is required" in response.get_json()['message']  # Check for specific error message
+    
+@pytest.mark.parametrize("invalid_am_pm", ["A", "Morning", "Evening", "", None])
+def test_create_work_arrangement_invalid_am_pm(client, invalid_am_pm):
+    # Step 1: Create a dummy employee to satisfy foreign key constraints
+    staff_id = create_dummy_employee(client)
+
+    # Step 2: Prepare the work arrangement data with an invalid AM_PM value
+    arrangement_data = {
+        "staff_id": staff_id,
+        "approving_id": staff_id,  # Self-approving for test purposes
+        "arrangement_type": "WFH",
+        "arrangement_date": date.today().strftime('%Y-%m-%d'),
+        "AM_PM": invalid_am_pm
+    }
+
+    # Step 3: Attempt to create the work arrangement with an invalid AM_PM value
+    response = client.post('/arrangements', json=arrangement_data)
+
+    # Step 4: Validate the response
+    assert response.status_code == 400  # Expecting a 400 Bad Request
+    assert "Invalid value for AM_PM. Please use \"AM\" or \"PM\"" in response.get_json()['message']  # Check for specific error message

@@ -8,6 +8,7 @@ class Arrangement(db.Model):
     Approving_ID = db.Column(db.Integer, db.ForeignKey('employees.Staff_ID') , index=True, nullable = False)
     Arrangement_Type = db.Column(db.String(20), nullable = False)
     Arrangement_Date = db.Column(db.Date, nullable = False)
+    AM_PM = db.Column(db.String(2), nullable=False)
     Status = db.Column(db.String(20), nullable = False)
     Application_Date = db.Column(db.DateTime, nullable = False)
     Approval_Date = db.Column(db.DateTime, nullable = True)
@@ -21,6 +22,7 @@ class Arrangement(db.Model):
             'approving_id' : self.Approving_ID,
             'arrangement_type' : self.Arrangement_Type,
             'arrangement_date' : self.Arrangement_Date.isoformat(),
+            'am_pm': self.AM_PM,
             'status' : self.Status,
             'application_date' : self.Application_Date.isoformat(),
             'approval_date' : self.Approval_Date.isoformat() if self.Approval_Date else None,

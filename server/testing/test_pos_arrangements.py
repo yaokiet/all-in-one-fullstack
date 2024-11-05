@@ -38,8 +38,8 @@ def create_dummy_employee(client):
         db.session.commit()
         return employee.Staff_ID  # Return the Staff_ID for foreign key use
 
-
-def test_view_own_arrangements_in_date_range(client):
+@pytest.mark.parametrize("am_pm", ["AM", "PM"])
+def test_view_own_arrangements_in_date_range(client, am_pm):
     # Step 1: Create a dummy employee to satisfy foreign key constraints
     staff_id = create_dummy_employee(client)
 
@@ -50,6 +50,7 @@ def test_view_own_arrangements_in_date_range(client):
         Approving_ID=staff_id,
         Arrangement_Type="WFH",
         Arrangement_Date=today - timedelta(days=3),  # 3 days ago
+        AM_PM=am_pm,
         Status="Approved",
         Application_Date=datetime.now(),
         Approval_Date=datetime.now()
@@ -60,6 +61,7 @@ def test_view_own_arrangements_in_date_range(client):
         Approving_ID=staff_id,
         Arrangement_Type="In-Office",
         Arrangement_Date=today + timedelta(days=1),  # Tomorrow
+        AM_PM=am_pm,
         Status="Pending",
         Application_Date=datetime.now(),
         Approval_Date=datetime.now()
@@ -70,6 +72,7 @@ def test_view_own_arrangements_in_date_range(client):
         Approving_ID=staff_id,
         Arrangement_Type="WFH",
         Arrangement_Date=today,  # Today
+        AM_PM=am_pm,
         Status="Approved",
         Application_Date=datetime.now(),
         Approval_Date=datetime.now()
@@ -94,9 +97,9 @@ def test_view_own_arrangements_in_date_range(client):
     assert arrangements_json[0]['arrangement_type'] == "WFH"  # arrangement1
     assert arrangements_json[1]['arrangement_type'] == "WFH"  # arrangement3
 
-# Here's how to add the `create_work_arrangement` test in the same file.
 
-def test_create_work_arrangement(client):
+@pytest.mark.parametrize("am_pm", ["AM", "PM"])
+def test_create_work_arrangement(client, am_pm):
     # Step 1: Create a dummy employee to satisfy foreign key constraints
     staff_id = create_dummy_employee(client)
     
@@ -105,7 +108,8 @@ def test_create_work_arrangement(client):
         "staff_id": staff_id,
         "approving_id": staff_id,  # Self-approving for test purposes
         "arrangement_type": "WFH",
-        "arrangement_date": (date.today() + timedelta(days=1)).strftime('%Y-%m-%d')  # Tomorrow's date
+        "arrangement_date": (date.today() + timedelta(days=1)).strftime('%Y-%m-%d'),  # Tomorrow's date
+        "AM_PM": am_pm
     }
     
     # Step 3: Make a POST request to create a work arrangement
@@ -118,6 +122,7 @@ def test_create_work_arrangement(client):
     assert arrangement_json['arrangement']['staff_id'] == staff_id
     assert arrangement_json['arrangement']['arrangement_type'] == "WFH"
     assert arrangement_json['arrangement']['status'] == "Pending"  # Status should default to "Pending"
+    assert arrangement_json['arrangement']['am_pm'] == am_pm
     
     # Step 5: Check if the arrangement was successfully created by querying the GET endpoint
     start_date = date.today().strftime('%Y-%m-%d')
@@ -130,8 +135,10 @@ def test_create_work_arrangement(client):
     # Verify that the created arrangement is in the response
     assert len(arrangements_json) == 1
     assert arrangements_json[0]['arrangement_type'] == "WFH"
+    assert arrangements_json[0]['am_pm'] == am_pm
 
-def test_update_work_arrangement_status(client):
+@pytest.mark.parametrize("am_pm", ["AM", "PM"])
+def test_update_work_arrangement_status(client, am_pm):
     # Step 1: Create a manager using the POST /employees route
     manager_data = {
         "staff_fname": "Manager",
@@ -167,7 +174,8 @@ def test_update_work_arrangement_status(client):
         "staff_id": employee['staff_id'],
         "approving_id": manager['staff_id'],  # The approving manager is the staff's manager
         "arrangement_type": "WFH",
-        "arrangement_date": "2024-09-21"
+        "arrangement_date": "2024-09-21",
+        "AM_PM": am_pm
     }
     response = client.post('/arrangements', json=arrangement_data)
     assert response.status_code == 201
