@@ -76,7 +76,7 @@ export default function RequestCard({
           <div className="flex items-center text-gray-600">
             <CalendarDays className="mr-2 h-5 w-5 text-gray-400" />
             <span className="mr-2">{request.arrangement_date}</span>
-            <span className="mr-2"> "{request.am_pm}"</span>
+            <span className="mr-2"> {request.am_pm}</span>
           </div>
 
           <div className="flex items-center text-gray-600 ">
