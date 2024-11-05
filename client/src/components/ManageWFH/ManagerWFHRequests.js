@@ -5,35 +5,8 @@ import ManageCard from "./manageCard";
 export default function ManagerWFHRequests() {
   const [requests, setRequests] = useState([]);
   const [activeTab, setActiveTab] = useState("pending");
+  const [signal, setSignal] = useState(false);
   const [error, setError] = useState(null);
-
-  // Dummy data for testing
-  const dummyRequests = [
-    {
-      id: 240,
-      employeeName: "Derek Tan",
-      date: "2024-10-30",
-      status: "Pending",
-      reason: "Need to focus on project deadlines",
-      rejectionReason: null,
-    },
-    {
-      id: 241,
-      employeeName: "Sarah Lee",
-      date: "2024-10-31",
-      status: "Approved",
-      reason: "Team meeting and planning session",
-      rejectionReason: null,
-    },
-    {
-      id: 242,
-      employeeName: "John Smith",
-      date: "2024-11-01",
-      status: "Rejected",
-      reason: "Important on-site meeting",
-      rejectionReason: "Physical presence required for client meeting",
-    },
-  ];
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -61,24 +34,10 @@ export default function ManagerWFHRequests() {
         console.error("Error fetching data:", error);
       }
     };
+    setSignal(false);
 
     fetchRequests();
-  }, [activeTab]);
-
-  const handleEdit = (requestId) => {
-    console.log("Edit request:", requestId);
-    // Implement edit functionality here
-  };
-
-  const handleApprove = (requestId) => {
-    console.log("Approve request:", requestId);
-    // Implement approve functionality here
-  };
-
-  const handleReject = (requestId) => {
-    console.log("Reject request:", requestId);
-    // Implement reject functionality here
-  };
+  }, [activeTab, signal]);
 
   return (
     <div className="bg-gray-100 rounded-lg shadow-md container mx-auto p-5">
@@ -121,7 +80,7 @@ export default function ManagerWFHRequests() {
               exit={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.1, delay: index * 0.1 }}
             >
-              <ManageCard request={request} />
+              <ManageCard request={request} setSignal={setSignal} />
             </motion.div>
           ))}
         </motion.div>

@@ -6,10 +6,8 @@ import Sidebar from "@/components/sidebar";
 import ScheduleView from "@/components/OwnSchedule/scheduleView";
 import WFHApplicationForm from "@/components/ApplyforWFH/applyWFH"; // Import the WFH form
 import OverallView from "@/components/ViewOverallSchedule/overallSchedule";
-import TeamsView from "@/components/ViewTeamSchedules/teamCard";
-import AllView from "@/components/ViewAllSchedules/allSchedules";
+import ManagerHolder from "@/components/ViewTeamSchedules/ManagerHolder";
 import ManagerWFHRequests from "@/components/ManageWFH/ManagerWFHRequests";
-import ManageArrangement from "@/components/ManageWFH/ManageArrangement";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 
@@ -87,6 +85,7 @@ export default function OwnSchedule() {
 
   useEffect(() => {
     const checkAuth = async () => {
+      setIsLoading(true);
       try {
         const response = await axios.post(
           `${process.env.NEXT_PUBLIC_SERVER_URL}/auth`,
@@ -102,6 +101,7 @@ export default function OwnSchedule() {
           );
           setPosition(response.data.position);
           setRole(response.data.role);
+          setIsLoading(false);
         } else {
           console.log("error with auth", response.data);
           router.push("/authentication");
@@ -307,82 +307,71 @@ export default function OwnSchedule() {
   }, [viewMode, getWeekStart]);
 
   return (
-    <div className="flex flex-col h-screen">
-      <Navbar username={username} position={position} role={role} />
-      <div className="flex flex-1 overflow-hidden">
-        <Sidebar
-          activeNav={activeNav}
-          setActiveNav={setActiveNav}
-          role={role}
-        />
-        <div className="flex-1 p-4 overflow-auto">
-          {isLoading && (
-            <div className="bg-blue-100 text-blue-800 p-4 rounded-md mb-4">
-              <p>Loading work arrangements...</p>
+    <>
+      {!isLoading && (
+        <div className="flex flex-col h-screen">
+          <Navbar username={username} position={position} role={role} />
+          <div className="flex flex-1 overflow-hidden">
+            <Sidebar
+              activeNav={activeNav}
+              setActiveNav={setActiveNav}
+              role={role}
+            />
+            <div className="flex-1 p-4 overflow-auto">
+              {isLoading && (
+                <div className="bg-blue-100 text-blue-800 p-4 rounded-md mb-4">
+                  <p>Loading work arrangements...</p>
+                </div>
+              )}
+
+              {activeNav === "View own schedule" && (
+                <ScheduleView
+                  schedule={schedule}
+                  workMode={workModeByDate}
+                  currentDate={currentDate}
+                  viewMode={viewMode}
+                  navigate={navigate}
+                  returnToCurrent={returnToCurrent}
+                  setViewMode={setViewMode}
+                  setCurrentDate={setCurrentDate}
+                  error={error}
+                />
+              )}
+
+              {activeNav === "Apply for WFH" && (
+                <WFHApplicationForm
+                  wfhForm={wfhForm}
+                  minWFHDate={minWFHDate}
+                  maxWFHDate={maxWFHDate}
+                  maxRecurringWeeks={maxRecurringWeeks}
+                  handleWfhInputChange={handleWfhInputChange}
+                  handleWfhSubmit={handleWfhSubmit}
+                />
+              )}
+
+              {activeNav === "View Overall Schedule" && (
+                <OverallView
+                  currentDate={currentDate}
+                  viewMode={viewMode}
+                  navigate={navigate}
+                  returnToCurrent={returnToCurrent}
+                  setViewMode={setViewMode}
+                />
+              )}
+
+              {activeNav === "Manage WFH Requests" && (
+                <ManagerWFHRequests teamSize={10} />
+              )}
+
+              {activeNav === "Manage Arrangements" && <ManageArrangement />}
+
+              {activeNav === "View Team Members' Schedules" && (
+                <ManagerHolder currentDate={currentDate} role={role} />
+              )}
             </div>
-          )}
-
-          {activeNav === "View own schedule" && (
-            <ScheduleView
-              schedule={schedule}
-              workMode={workModeByDate}
-              currentDate={currentDate}
-              viewMode={viewMode}
-              navigate={navigate}
-              returnToCurrent={returnToCurrent}
-              setViewMode={setViewMode}
-              setCurrentDate={setCurrentDate}
-              error={error}
-            />
-          )}
-
-          {activeNav === "Apply for WFH" && (
-            <WFHApplicationForm
-              wfhForm={wfhForm}
-              minWFHDate={minWFHDate}
-              maxWFHDate={maxWFHDate}
-              maxRecurringWeeks={maxRecurringWeeks}
-              handleWfhInputChange={handleWfhInputChange}
-              handleWfhSubmit={handleWfhSubmit}
-            />
-          )}
-
-          {activeNav === "View Overall Schedule" && (
-            <OverallView
-              currentDate={currentDate}
-              viewMode={viewMode}
-              navigate={navigate}
-              returnToCurrent={returnToCurrent}
-              setViewMode={setViewMode}
-            />
-          )}
-
-          {activeNav === "Manage WFH Requests" && (
-            <ManagerWFHRequests teamSize={10} />
-          )}
-
-          {activeNav === "Manage Arrangements" && <ManageArrangement />}
-
-          {activeNav === "View Team Members' Schedules" && (
-            <TeamsView
-              currentDate={currentDate}
-              viewMode={viewMode}
-              navigate={navigate}
-              returnToCurrent={returnToCurrent}
-              setViewMode={setViewMode}
-            />
-          )}
-          {activeNav === "View All Schedules" && (
-            <AllView
-              currentDate={currentDate}
-              viewMode={viewMode}
-              navigate={navigate}
-              returnToCurrent={returnToCurrent}
-              setViewMode={setViewMode}
-            />
-          )}
+          </div>
         </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 }
