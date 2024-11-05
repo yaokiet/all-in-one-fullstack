@@ -44,7 +44,7 @@ export default function OwnSchedule() {
   const [currentDate, setCurrentDate] = useState(() =>
     getWeekStart(new Date())
   );
-  const [viewMode, setViewMode] = useState("week");
+  const [viewMode, setViewMode] = useState("month");
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -172,7 +172,14 @@ export default function OwnSchedule() {
         const arrangementDate = formatDate(
           new Date(arrangement.arrangement_date)
         );
-        newWorkModeByDate[arrangementDate] = {
+
+        // Initialize date entry if it doesn't exist
+        if (!newWorkModeByDate[arrangementDate]) {
+          newWorkModeByDate[arrangementDate] = {};
+        }
+
+        // Add "AM" or "PM" arrangement details under the specific date
+        newWorkModeByDate[arrangementDate][arrangement.am_pm] = {
           mode: arrangement.arrangement_type,
           status: arrangement.status,
         };
@@ -310,7 +317,11 @@ export default function OwnSchedule() {
     <>
       {!isLoading && (
         <div className="flex flex-col h-screen">
-          <Navbar username={username} position={position} role={role} setActiveNav={setActiveNav} // Pass setActiveNav to Navbar
+          <Navbar
+            username={username}
+            position={position}
+            role={role}
+            setActiveNav={setActiveNav} // Pass setActiveNav to Navbar
           />
           <div className="flex flex-1 overflow-hidden">
             <Sidebar

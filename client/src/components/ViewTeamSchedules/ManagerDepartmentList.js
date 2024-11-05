@@ -46,7 +46,12 @@ export default function ManagerDepartmentList({ setPageState, setDepartment }) {
       ) : (
         <div className="space-y-4">
           {depts.map((dept) => (
-            <DepartmentCard key={dept.department} dept={dept} setPageState={setPageState} setDepartment={setDepartment} />
+            <DepartmentCard
+              key={dept.department}
+              dept={dept}
+              setPageState={setPageState}
+              setDepartment={setDepartment}
+            />
           ))}
         </div>
       )}

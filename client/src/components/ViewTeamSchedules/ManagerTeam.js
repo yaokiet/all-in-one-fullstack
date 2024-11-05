@@ -20,7 +20,9 @@ export default function ManagerTeam({ currentDate, position, setPageState }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTeamData, setSelectedTeamData] = useState([]);
+  const [modalAMPM, setModalAMPM] = useState("");
   const [allTeamMembers, setAllTeamMembers] = useState([]);
+  const [teamSize, setTeamSize] = useState(null);
   const [animationTrigger, setAnimationTrigger] = useState(0);
 
   const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
@@ -40,8 +42,30 @@ export default function ManagerTeam({ currentDate, position, setPageState }) {
         if (!response.ok) throw new Error("Failed to fetch team arrangements");
 
         const data = await response.json();
-        setTeamArrangementsWithCount(data.daily_data);
-        setAllTeamMembers(data.team_members);
+        console.log(data);
+        const totalMembers = data.team_members.length; // Get total team size
+        setTeamSize(totalMembers);
+        const processedData = {};
+
+        for (const [date, dayData] of Object.entries(data.daily_data)) {
+          processedData[date] = {
+            am: {
+              inoffice_count: dayData.in_office_count_am,
+              wfh_count: dayData.wfh_count_am,
+              team_arrangements: data.team_arrangements, // Full team arrangements
+              team_schedules: dayData.schedules, // Full team schedules
+            },
+            pm: {
+              inoffice_count: dayData.in_office_count_pm,
+              wfh_count: dayData.wfh_count_pm,
+              team_arrangements: data.team_arrangements, // Full team arrangements
+              team_schedules: dayData.schedules, // Full team schedules
+            },
+          };
+        }
+        setTeamArrangementsWithCount(processedData);
+        setAllTeamMembers(data.team_members)
+
         setAnimationTrigger((prev) => prev + 1); // Trigger animation
       } catch (error) {
         console.error("Error:", error);
@@ -53,11 +77,12 @@ export default function ManagerTeam({ currentDate, position, setPageState }) {
     fetchTeamArrangements();
   }, [currentWeekStart, currentWeekEnd]);
 
-  const handleDayClick = (date) => {
-    const dayData = teamArrangementsWithCount?.[date];
+  const handleDayClick = (date, dayData, ampm) => {
     setSelectedDate(date);
-    if (dayData) setSelectedTeamData(dayData.schedules);
+    setSelectedTeamData(dayData?.team_schedules || []); // Ensure it uses AM/PM-specific schedules
     setModalOpen(true);
+    setModalAMPM(ampm); // Set the correct AM or PM value
+    // console.log(`Team overview data for ${date} (${ampm}):`, dayData); // Log dayData and ampm when clicked
   };
 
   const navigateWeek = (direction) => {
@@ -151,7 +176,7 @@ export default function ManagerTeam({ currentDate, position, setPageState }) {
                 ) : (
                   daysOfWeek.map((_, idx) => {
                     const date = formatDate(currentWeekStart, idx);
-                    const dayData = teamArrangementsWithCount?.[date];
+                    const dayDataAM = teamArrangementsWithCount?.[date]?.am; // Get AM data
 
                     return (
                       <td key={idx} className="px-4 py-4 border">
@@ -166,9 +191,10 @@ export default function ManagerTeam({ currentDate, position, setPageState }) {
                           }}
                         >
                           <TeamDayCard
-                            dayData={dayData}
+                            dayData={dayDataAM}
                             date={date}
-                            onClick={() => handleDayClick(date)}
+                            onClick={() => handleDayClick(date, dayDataAM, "AM")}
+                            totalMembers={teamSize}
                           />
                         </div>
                       </td>
@@ -190,7 +216,7 @@ export default function ManagerTeam({ currentDate, position, setPageState }) {
                 ) : (
                   daysOfWeek.map((_, idx) => {
                     const date = formatDate(currentWeekStart, idx);
-                    const dayData = teamArrangementsWithCount?.[date];
+                    const dayDataPM = teamArrangementsWithCount?.[date]?.pm; // Get AM data
 
                     return (
                       <td key={idx} className="px-4 py-4 border">
@@ -205,9 +231,12 @@ export default function ManagerTeam({ currentDate, position, setPageState }) {
                           }}
                         >
                           <TeamDayCard
-                            dayData={dayData}
+                            dayData={dayDataPM}
                             date={date}
-                            onClick={() => handleDayClick(date)}
+                            onClick={() =>
+                              handleDayClick(date, dayDataPM, "PM")
+                            }
+                            totalMembers={teamSize}
                           />
                         </div>
                       </td>
@@ -227,6 +256,7 @@ export default function ManagerTeam({ currentDate, position, setPageState }) {
         date={selectedDate}
         teamData={selectedTeamData}
         allTeamMembers={allTeamMembers}
+        ampm={modalAMPM}
       />
 
       <style jsx>{`

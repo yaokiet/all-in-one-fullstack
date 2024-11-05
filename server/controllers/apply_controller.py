@@ -86,32 +86,37 @@ def apply_arrangement():
                     'message': f'Invalid date format for {date_str}. Use YYYY-MM-DD.'
                 }), 400
 
-            # Check if arrangement already exists for this staff_id and arrangement_date
-            existing_arrangement = Arrangement.query.filter_by(
-                Staff_ID=staff_id,
-                Arrangement_Date=arrangement_date
-            ).first()
+            # Handle "Full Day" by creating two arrangements: one for "AM" and one for "PM"
+            times_of_day = ["AM", "PM"] if am_pm == "Full Day" else [am_pm]
 
-            if existing_arrangement:
-                return jsonify({
-                    'code': 409,  # Conflict HTTP status code
-                    'message': f'An arrangement for {arrangement_date} already exists for this employee.'
-                }), 409
+            for time in times_of_day:
+                # Check if arrangement already exists for this staff_id, arrangement_date, and time
+                existing_arrangement = Arrangement.query.filter_by(
+                    Staff_ID=staff_id,
+                    Arrangement_Date=arrangement_date,
+                    AM_PM=time
+                ).first()
 
-            # If no existing arrangement, create a new one
-            new_arrangement = Arrangement(
-                Staff_ID=staff_id,
-                Approving_ID=approving_id,
-                Arrangement_Type=arrangement_type,
-                Arrangement_Date=arrangement_date,
-                Status='Pending',  # Default status
-                Application_Date=application_date,
-                Reason=reason,
-                Manager_Reason = "",
-                AM_PM = am_pm
-            )
-            arrangements.append(new_arrangement)
-            db.session.add(new_arrangement)
+                if existing_arrangement:
+                    return jsonify({
+                        'code': 409,  # Conflict HTTP status code
+                        'message': f'An arrangement for {arrangement_date} ({time}) already exists for this employee.'
+                    }), 409
+
+                # If no existing arrangement, create a new one
+                new_arrangement = Arrangement(
+                    Staff_ID=staff_id,
+                    Approving_ID=approving_id,
+                    Arrangement_Type=arrangement_type,
+                    Arrangement_Date=arrangement_date,
+                    Status='Pending',  # Default status
+                    Application_Date=application_date,
+                    Reason=reason,
+                    Manager_Reason = "",
+                    AM_PM = time  # Set "AM" or "PM" based on the loop
+                )
+                arrangements.append(new_arrangement)
+                db.session.add(new_arrangement)
 
         # Commit all new arrangements
         db.session.commit()

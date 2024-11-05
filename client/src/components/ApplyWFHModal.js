@@ -66,6 +66,7 @@ export default function ApplyWFHModal({ isOpen, onClose, setRequestSignal }) {
     };
 
     try {
+      console.log("payload: ", payload);
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/apply`,
         {

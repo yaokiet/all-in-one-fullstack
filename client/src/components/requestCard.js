@@ -76,6 +76,7 @@ export default function RequestCard({
           <div className="flex items-center text-gray-600">
             <CalendarDays className="mr-2 h-5 w-5 text-gray-400" />
             <span className="mr-2">{request.arrangement_date}</span>
+            <span className="mr-2"> "{request.am_pm}"</span>
           </div>
 
           <div className="flex items-center text-gray-600 ">
@@ -97,7 +98,7 @@ export default function RequestCard({
       </div>
       <div className="bg-gray-50 px-6 py-3 flex justify-end space-x-3">
         {/* Conditionally render the Withdraw Request button if the status is NOT 'approved' */}
-        {request.status.toLowerCase() !== "approved" && (
+        {request.status.toLowerCase() !== "rejected" && (
           <button
             onClick={handleWithdraw}
             type="button"
