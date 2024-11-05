@@ -12,7 +12,7 @@ import requests
 load_dotenv()
 
 # Get the production URL from the environment variable
-PRODUCTION_URL = os.getenv('PRODUCTION_URL', 'http://localhost:5000')
+PRODUCTION_URL = os.getenv('PRODUCTION_URL')
 
 # Create a new Blueprint for team view-related routes
 team_view_bp = Blueprint('team_view', __name__)
