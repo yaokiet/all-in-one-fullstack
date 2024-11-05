@@ -50,7 +50,7 @@ def populate_work_arrangements():
                 Arrangement_Type='WFH',
                 Arrangement_Date=tuesday,
                 AM_PM="PM",
-                Status='Rejected',
+                Status='Approved',
                 Application_Date=tuesday_application,
                 Approval_Date=tuesday_approval
             ),
@@ -60,7 +60,7 @@ def populate_work_arrangements():
                 Arrangement_Type='WFH',
                 Arrangement_Date=wednesday,
                 AM_PM="AM",
-                Status='Pending',
+                Status='Approved',
                 Application_Date=wednesday_application,
                 Approval_Date=None
             )
@@ -84,7 +84,7 @@ def populate_work_arrangements():
                 Arrangement_Type='WFH',
                 Arrangement_Date=wednesday,
                 AM_PM="AM",
-                Status='Rejected',
+                Status='Approved',
                 Application_Date=wednesday_application,
                 Approval_Date=wednesday_approval
             ),
@@ -94,7 +94,7 @@ def populate_work_arrangements():
                 Arrangement_Type='WFH',
                 Arrangement_Date=thursday,
                 AM_PM="AM",
-                Status='Pending',
+                Status='Approved',
                 Application_Date=thursday_application,
                 Approval_Date=None
             )
@@ -118,7 +118,7 @@ def populate_work_arrangements():
                 Arrangement_Type='WFH',
                 Arrangement_Date=thursday,
                 AM_PM="PM",
-                Status='Rejected',
+                Status='Approved',
                 Application_Date=thursday_application,
                 Approval_Date=None
             ),
@@ -128,7 +128,7 @@ def populate_work_arrangements():
                 Arrangement_Type='WFH',
                 Arrangement_Date=friday,
                 AM_PM="PM",
-                Status='Pending',
+                Status='Approved',
                 Application_Date=thursday_application,
                 Approval_Date=None
             )

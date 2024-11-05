@@ -12,11 +12,14 @@ export default function OverallView({ currentDate }) {
   );
   const [teamArrangementsWithCount, setTeamArrangementsWithCount] =
     useState(null);
+  const [teamsize, setTeamSize] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTeamData, setSelectedTeamData] = useState([]);
+  const [modalAMPM, setModalAMPM] = useState('');
   const [allTeamMembers, setAllTeamMembers] = useState([]);
+  // const [allArrangements, setAllArrangements] = useState([]);
   const [animationTrigger, setAnimationTrigger] = useState(0);
 
   const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
@@ -36,8 +39,34 @@ export default function OverallView({ currentDate }) {
         if (!response.ok) throw new Error("Failed to fetch team arrangements");
 
         const data = await response.json();
-        setTeamArrangementsWithCount(data.daily_data);
+        console.log("Raw data received:", data);
+
+        const totalMembers = data.team_members.length;  // Get total team size
+        setTeamSize(totalMembers);
+        const processedData = {};
+        // ------------------------------------------------------------------------------------------------------------------------
+        // This code section is meant for implementing proper am pm viewing
+        // ------------------------------------------------------------------------------------------------------------------------
+        for (const [date, dayData] of Object.entries(data.daily_data)) {
+          processedData[date] = {
+            am: {
+              inoffice_count: dayData.in_office_count_am,
+              wfh_count: dayData.wfh_count_am,
+              team_arrangements: data.team_arrangements,  // Full team arrangements
+              team_schedules: dayData.schedules         // Full team schedules
+            },
+            pm: {
+              inoffice_count: dayData.in_office_count_pm,
+              wfh_count: dayData.wfh_count_pm,
+              team_arrangements: data.team_arrangements,  // Full team arrangements
+              team_schedules: dayData.schedules         // Full team schedules
+            }
+          };
+        }
+        // ------------------------------------------------------------------------------------------------------------------------
+        setTeamArrangementsWithCount(processedData);
         setAllTeamMembers(data.team_members);
+        // setAllArrangements(data.team_arrangements);
         setAnimationTrigger((prev) => prev + 1); // Trigger animation
       } catch (error) {
         console.error("Error:", error);
@@ -49,13 +78,14 @@ export default function OverallView({ currentDate }) {
     fetchTeamArrangements();
   }, [currentWeekStart, currentWeekEnd]);
 
-  const handleDayClick = (date) => {
-    const dayData = teamArrangementsWithCount?.[date];
+  const handleDayClick = (date, dayData,ampm) => {
     setSelectedDate(date);
-    if (dayData) setSelectedTeamData(dayData.schedules);
+    setSelectedTeamData(dayData?.team_schedules || []); // Ensure it uses AM/PM-specific schedules
     setModalOpen(true);
+    setModalAMPM(ampm); // Set the correct AM or PM value
+    console.log(`Team overview data for ${date} (${ampm}):`, dayData); // Log dayData and ampm when clicked
   };
-
+  
   const navigateWeek = (direction) => {
     if (direction === "current") {
       const thisWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
@@ -135,7 +165,8 @@ export default function OverallView({ currentDate }) {
                 ) : (
                   daysOfWeek.map((_, idx) => {
                     const date = formatDate(currentWeekStart, idx);
-                    const dayData = teamArrangementsWithCount?.[date];
+                    // const dayData = teamArrangementsWithCount?.[date]?.AM;
+                    const dayDataAM = teamArrangementsWithCount?.[date]?.am; // Get AM data
 
                     return (
                       <td key={idx} className="px-4 py-4 border">
@@ -150,9 +181,10 @@ export default function OverallView({ currentDate }) {
                           }}
                         >
                           <TeamDayCard
-                            dayData={dayData}
+                            dayData={dayDataAM}  // Pass AM-specific data
                             date={date}
-                            onClick={() => handleDayClick(date)}
+                            onClick={() => handleDayClick(date, dayDataAM,"AM")}
+                            totalMembers={teamsize} // Pass totalMembers
                           />
                         </div>
                       </td>
@@ -174,7 +206,7 @@ export default function OverallView({ currentDate }) {
                 ) : (
                   daysOfWeek.map((_, idx) => {
                     const date = formatDate(currentWeekStart, idx);
-                    const dayData = teamArrangementsWithCount?.[date];
+                    const dayDataPM = teamArrangementsWithCount?.[date]?.pm; // Get AM data
 
                     return (
                       <td key={idx} className="px-4 py-4 border">
@@ -189,9 +221,10 @@ export default function OverallView({ currentDate }) {
                           }}
                         >
                           <TeamDayCard
-                            dayData={dayData}
+                            dayData={dayDataPM}  // Pass AM-specific data
                             date={date}
-                            onClick={() => handleDayClick(date)}
+                            onClick={() => handleDayClick(date, dayDataPM,"PM")}
+                            totalMembers={teamsize} // Pass totalMembers
                           />
                         </div>
                       </td>
@@ -210,6 +243,7 @@ export default function OverallView({ currentDate }) {
         onClose={() => setModalOpen(false)}
         date={selectedDate}
         teamData={selectedTeamData}
+        ampm={modalAMPM} // Pass the modalAMPM value correctly
         allTeamMembers={allTeamMembers}
       />
 
