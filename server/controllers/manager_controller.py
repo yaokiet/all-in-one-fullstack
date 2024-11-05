@@ -4,6 +4,7 @@ from models.arrangement import Arrangement
 from datetime import datetime, timedelta
 from sqlalchemy import and_
 import requests
+import os
 from dotenv import load_dotenv
 
 # Create a new Blueprint for team view-related routes

@@ -13,6 +13,7 @@ load_dotenv()
 
 # Get the production URL from the environment variable
 PRODUCTION_URL = os.getenv('PRODUCTION_URL')
+print(f"Loaded PRODUCTION_URL: {PRODUCTION_URL}")  # Add this line to verify
 
 # Create a new Blueprint for team view-related routes
 team_view_bp = Blueprint('team_view', __name__)
@@ -92,6 +93,7 @@ def team_arrangements_with_count():
 
     # Step 2: Call /team_members API to get the team members
     team_members_url = f'{PRODUCTION_URL}/team_members'
+    print(team_members_url)
     session_cookie = request.cookies.get('session')  # Get the session cookie from the original request
     headers = {'Cookie': f'session={session_cookie}'}  # Set the session cookie in the header
     team_members_response = requests.get(team_members_url, headers=headers)
