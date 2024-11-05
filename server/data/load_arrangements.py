@@ -1,10 +1,11 @@
 from extensions import db
 from datetime import datetime, timedelta
 from models.arrangement import Arrangement
-from app import app  # Directly import app from app.py
+# from app import app  # Directly import app from app.py
+from app import create_app
 
 # Constants for staff and approving manager
-STAFF_ID_1 = 210045
+STAFF_ID_1 = 210074
 STAFF_ID_2 = 160008
 STAFF_ID_3 = 140001
 APPROVING_ID = 130002
@@ -38,6 +39,7 @@ def populate_work_arrangements():
                 Approving_ID=APPROVING_ID,
                 Arrangement_Type='WFH',
                 Arrangement_Date=monday,
+                AM_PM="AM",
                 Status='Approved',
                 Application_Date=monday_application,
                 Approval_Date=monday_approval
@@ -47,6 +49,7 @@ def populate_work_arrangements():
                 Approving_ID=APPROVING_ID,
                 Arrangement_Type='WFH',
                 Arrangement_Date=tuesday,
+                AM_PM="PM",
                 Status='Rejected',
                 Application_Date=tuesday_application,
                 Approval_Date=tuesday_approval
@@ -56,6 +59,7 @@ def populate_work_arrangements():
                 Approving_ID=APPROVING_ID,
                 Arrangement_Type='WFH',
                 Arrangement_Date=wednesday,
+                AM_PM="AM",
                 Status='Pending',
                 Application_Date=wednesday_application,
                 Approval_Date=None
@@ -69,6 +73,7 @@ def populate_work_arrangements():
                 Approving_ID=APPROVING_ID,
                 Arrangement_Type='WFH',
                 Arrangement_Date=tuesday,
+                AM_PM="PM",
                 Status='Approved',
                 Application_Date=tuesday_application,
                 Approval_Date=tuesday_approval
@@ -78,6 +83,7 @@ def populate_work_arrangements():
                 Approving_ID=APPROVING_ID,
                 Arrangement_Type='WFH',
                 Arrangement_Date=wednesday,
+                AM_PM="AM",
                 Status='Rejected',
                 Application_Date=wednesday_application,
                 Approval_Date=wednesday_approval
@@ -87,6 +93,7 @@ def populate_work_arrangements():
                 Approving_ID=APPROVING_ID,
                 Arrangement_Type='WFH',
                 Arrangement_Date=thursday,
+                AM_PM="AM",
                 Status='Pending',
                 Application_Date=thursday_application,
                 Approval_Date=None
@@ -100,6 +107,7 @@ def populate_work_arrangements():
                 Approving_ID=APPROVING_ID,
                 Arrangement_Type='WFH',
                 Arrangement_Date=wednesday,
+                AM_PM="PM",
                 Status='Approved',
                 Application_Date=wednesday_application,
                 Approval_Date=wednesday_approval
@@ -109,6 +117,7 @@ def populate_work_arrangements():
                 Approving_ID=APPROVING_ID,
                 Arrangement_Type='WFH',
                 Arrangement_Date=thursday,
+                AM_PM="PM",
                 Status='Rejected',
                 Application_Date=thursday_application,
                 Approval_Date=None
@@ -118,6 +127,7 @@ def populate_work_arrangements():
                 Approving_ID=APPROVING_ID,
                 Arrangement_Type='WFH',
                 Arrangement_Date=friday,
+                AM_PM="PM",
                 Status='Pending',
                 Application_Date=thursday_application,
                 Approval_Date=None
@@ -140,6 +150,9 @@ def populate_work_arrangements():
         print(f"Error while populating work arrangements: {str(e)}")
 
 if __name__ == "__main__":
+    # Initialize the app using the factory function
+    app = create_app()
+
     # Use the app context directly
     with app.app_context():
         populate_work_arrangements()

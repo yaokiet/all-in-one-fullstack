@@ -122,7 +122,17 @@ def team_arrangements_with_count():
     date_range = [(start_date + timedelta(days=i)).strftime('%Y-%m-%d') for i in range((end_date - start_date).days + 1)]
 
     # Prepare response data for each date
-    daily_data = {day: {'in_office_count': len(team_members), 'wfh_count': 0, 'total_members': len(team_members), 'schedules': []} for day in date_range}
+    daily_data = {
+        day: {
+            'in_office_count_am': len(team_members),
+            'in_office_count_pm': len(team_members),
+            'wfh_count_am': 0,
+            'wfh_count_pm': 0,
+            'total_members': len(team_members), 
+            'schedules': []
+            } 
+            for day in date_range
+        }
 
     # Collect the arrangements for each team member and update the counts
     collated_arrangements = []
@@ -140,18 +150,25 @@ def team_arrangements_with_count():
                 arrangement_date = arrangement['arrangement_date']
                 arrangement_type = arrangement['arrangement_type']
                 arrangement_status = arrangement['status']
+                am_pm = arrangement.get('am_pm', 'AM')  # Default to 'AM' if not provided
 
                 if arrangement_date in daily_data:
                     # If WFH, adjust the counts and arrangements accordingly
                     if (arrangement_type == 'WFH' and arrangement_status == 'Approved'):
-                        daily_data[arrangement_date]['wfh_count'] += 1
-                        daily_data[arrangement_date]['in_office_count'] -= 1
+                        if am_pm == 'AM':
+                            daily_data[arrangement_date]['wfh_count_am'] += 1
+                            daily_data[arrangement_date]['in_office_count_am'] -= 1
+                        else:
+                            daily_data[arrangement_date]['wfh_count_pm'] += 1
+                            daily_data[arrangement_date]['in_office_count_pm'] -= 1
+
 
                     # Add the member's arrangement to the daily schedule
                     daily_data[arrangement_date]['schedules'].append({
                         'member_id': member['staff_id'],
                         'arrangement': arrangement_type,
-                        'arrangement_status': arrangement_status
+                        'arrangement_status': arrangement_status,
+                        'am_pm': am_pm
                     })
 
             # Collate the member's arrangement for the full range
