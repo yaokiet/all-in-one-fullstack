@@ -375,8 +375,6 @@ export default function OwnSchedule() {
                 <ManagerWFHRequests teamSize={10} />
               )}
 
-              {activeNav === "Manage Arrangements" && <ManageArrangement />}
-
               {activeNav === "View Team Members' Schedules" && (
                 <ManagerHolder currentDate={currentDate} role={role} />
               )}
