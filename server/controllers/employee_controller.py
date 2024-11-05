@@ -63,6 +63,7 @@ def login():
         session['staff_fname'] = employee.Staff_FName
         session['staff_lname'] = employee.Staff_LName
         session.permanent = True 
+        print("Session after login:", session)  # Log the session to check its contents
 
 
         return jsonify({

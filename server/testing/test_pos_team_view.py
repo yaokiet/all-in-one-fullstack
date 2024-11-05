@@ -10,18 +10,19 @@ from flask import session
 # To ensure pytest can find the app, run 
 # export PYTHONPATH=/Users/joelsng/Documents/GitHub/all-in-one-fullstack/server:$PYTHONPATH
 # ensure that the file path fits your directory
+# 
 
 @pytest.fixture
 def client():
-    # Set up Flask test client and application context
     app = create_app(TestingConfig)
-
     with app.test_client() as client:
         with app.app_context():
-            db.create_all()  # Create the test tables
-            yield client
-            db.session.remove()  # Clean up the database session
-            db.drop_all()  # Drop the test tables after tests are done
+            db.drop_all()  # Drop all tables to ensure no data persistence
+            db.create_all()  # Recreate tables fresh
+        yield client
+        with app.app_context():
+            db.drop_all()  # Clean up after each test
+
 
 def create_dummy_employee(client, email, staff_fname="John", staff_lname="Doe", manager_id=None):
     with client.application.app_context():  # Ensure operations happen within app context
@@ -53,7 +54,7 @@ def create_work_arrangement(client, staff_id, arrangement_type, arrangement_date
         db.session.add(arrangement)
         db.session.commit()
         
-def login_user(client, email="john.doe@example.com", password="password123"):
+def login_user(client, email="john.doe@example.com"):
     """Helper function to log a user in."""
     response = client.post('/login', json={
         'email': email,

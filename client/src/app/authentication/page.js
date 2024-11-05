@@ -108,17 +108,17 @@ export default function LoginPage() {
           <div className="mb-8">
             <Image
               src="/logo_large.png"
-              alt="Company Logo"
-              width={200}
+              alt="Logo"
+              width={150} // specify both width and height, or use fill
               height={100}
-              priority
+              priority // set priority for above-the-fold images
             />
           </div>
           <div>
             <Image
               src="/title.png"
               alt="All in One"
-              width={200}
+              width={150}
               height={50}
               priority
             />

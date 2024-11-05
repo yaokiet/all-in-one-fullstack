@@ -113,7 +113,7 @@ export default function OwnSchedule() {
     };
 
     checkAuth();
-  }, []);
+  }, [router]);
 
   const generateSchedule = useCallback(
     (date, mode) => {

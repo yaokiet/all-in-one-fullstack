@@ -7,16 +7,16 @@ from config import TestingConfig
 
 @pytest.fixture
 def client():
-    # Set up Flask test client and application context
     app = create_app(TestingConfig)
-
     with app.test_client() as client:
         with app.app_context():
-            db.create_all()  # Create the test tables
+            db.drop_all()  # Drop all tables to ensure no data persistence
+            db.create_all()  # Recreate tables fresh
         yield client
-
         with app.app_context():
-            db.drop_all()  # Drop the test tables after tests are done
+            db.drop_all()  # Clean up after each test
+
+
 
 def test_neg_fetch_nonexistent_employee(client: FlaskClient):
     # Attempt to fetch an employee with a non-existent staff_id

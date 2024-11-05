@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import DayCard from "../daycard";
-import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, Router } from 'lucide-react';
 
 const ScheduleView = ({ schedule, workMode, currentDate, viewMode, navigate, returnToCurrent, setViewMode, setCurrentDate }) => {
     const getWeekStart = (date) => {
@@ -74,7 +74,7 @@ const ScheduleView = ({ schedule, workMode, currentDate, viewMode, navigate, ret
 
     useEffect(() => {
         generateDateOptions();
-    }, [currentDate, viewMode]);
+    }, [currentDate, viewMode, Router]);
 
     const handleDateChange = (value) => {
         const selectedDate = new Date(value);
