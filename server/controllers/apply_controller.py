@@ -191,8 +191,7 @@ def manager_view_arrangements():
             arrangement_data = arr.serialize()
             if employee:
                 arrangement_data['fullname'] = employee.Staff_FName + " " + employee.Staff_LName
-                arrangement_data['is_above_threshold'] = num_approved(staff_id, arr.Arrangement_Date) 
-
+                arrangement_data['is_above_threshold'] = num_approved(staff_id, arr.Arrangement_Date, arr.AM_PM)
 
             arrangements_with_employee.append(arrangement_data)
                        
