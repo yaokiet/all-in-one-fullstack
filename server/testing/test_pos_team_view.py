@@ -176,3 +176,4 @@ def test_team_arrangements_with_count(client):
     # assert data["daily_data"][start_date.strftime('%Y-%m-%d')]["wfh_count_am"] == 1
     # assert data["daily_data"][end_date.strftime('%Y-%m-%d')]["wfh_count_am"] == 1
     # assert data["daily_data"][start_date.strftime('%Y-%m-%d')]["in_office_count_am"] == 1  # Assuming only two employees
+    pass
