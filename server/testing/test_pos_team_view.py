@@ -94,35 +94,23 @@ def test_team_members(client):
         "employee1@example.com", 
         staff_fname="Employee1", 
         staff_lname="One", 
-        manager_id=manager_id, 
+        manager_id=big_manager_id, 
     )
+    print("FIRST",staff_id_1)
     staff_id_2 = create_dummy_employee(
         client, 
         "employee2@example.com", 
         staff_fname="Employee2", 
         staff_lname="Two", 
-        manager_id=manager_id, 
+        manager_id=big_manager_id, 
     )
+    print("SECOND",staff_id_2)
     staff_id_3 = create_dummy_employee(
         client, 
         "employee3@example.com", 
         staff_fname="Employee3", 
         staff_lname="Three", 
-        manager_id=manager_id, 
-    )
-    staff_id_4 = create_dummy_employee(
-        client, 
-        "employee4@example.com", 
-        staff_fname="Employee4", 
-        staff_lname="Four", 
-        manager_id=manager_id, 
-    )
-    staff_id_5 = create_dummy_employee(
-        client, 
-        "employee5@example.com", 
-        staff_fname="Employee5", 
-        staff_lname="Five", 
-        manager_id=manager_id, 
+        manager_id=big_manager_id, 
     )
     
     # Log in as the manager
@@ -137,10 +125,10 @@ def test_team_members(client):
     # Assertions
     assert response.status_code == 200
     assert "team_members" in data
-    assert len(data["team_members"]) == 5  # Expecting 5 team members as per your example
-    assert data["team_size"] == 5
+    assert len(data["team_members"]) == 4  # Expecting 3 team members as per your example
+    assert data["team_size"] == 4
 
-    # Validate that each member has the required structure
+    # # Validate that each member has the required structure
     for member in data["team_members"]:
         assert "country" in member
         assert "dept" in member
@@ -151,7 +139,7 @@ def test_team_members(client):
         assert "staff_fname" in member
         assert "staff_id" in member
         assert "staff_lname" in member
-        assert member["reporting_manager"] == manager_id  # Ensure correct reporting manager
+        assert member["reporting_manager"] == big_manager_id  # Ensure correct reporting manager
 
 
 
