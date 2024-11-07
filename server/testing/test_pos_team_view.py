@@ -142,38 +142,64 @@ def test_team_members(client):
         assert member["reporting_manager"] == big_manager_id  # Ensure correct reporting manager
 
 
-
-
-
 def test_team_arrangements_with_count(client):
-    # # Setup: create a big manager and a manager reporting to the big manager
-    # big_manager_email = "bigmanager@example.com"
-    # big_manager_id = create_dummy_employee(client, big_manager_email, staff_fname="Big", staff_lname="Manager", manager_id=None)
+    # Setup: create a big manager and a manager reporting to the big manager
+    big_manager_email = "bigmanager@example.com"
+    big_manager_id = create_dummy_employee(client, big_manager_email, staff_fname="Big", staff_lname="Manager", manager_id=None)
     
-    # # Setup: create manager and employees with arrangements
-    # manager_id = create_dummy_employee(client, "manager@example.com", staff_fname="Manager")
-    # staff_id_1 = create_dummy_employee(client, "employee1@example.com", manager_id=manager_id)
-    # staff_id_2 = create_dummy_employee(client, "employee2@example.com", manager_id=manager_id)
-
-    # # Set up sample work arrangements
-    # start_date = date.today()
-    # end_date = start_date + timedelta(days=2)
-    # create_work_arrangement(client, staff_id_1, "WFH", start_date, status="Approved", AM_PM='AM')
-    # create_work_arrangement(client, staff_id_2, "WFH", end_date, status="Approved", AM_PM = 'AM')
+    # Create a manager reporting to the big manager
+    manager_email = "manager@example.com"
+    manager_id = create_dummy_employee(
+        client, 
+        manager_email, 
+        staff_fname="Manager", 
+        staff_lname="Doe", 
+        manager_id=big_manager_id, 
+    )
     
-    # # Simulate login for the manager
-    # with client.session_transaction() as sess:
-    #     sess['employee_id'] = manager_id
+   # Create employees reporting to the same manager
+    employees = []
+    for i in range(1, 6):
+        employee_id = create_dummy_employee(
+            client, 
+            email=f"employee{i}@example.com", 
+            staff_fname=f"Employee{i}", 
+            staff_lname=f"{i}", 
+            manager_id=manager_id
+        )
+        employees.append(employee_id)
 
-    # # Make the request to fetch team arrangements within the specified date range
-    # response = client.get(f'/team_arrangements_with_count?start_date={start_date}&end_date={end_date}')
-    # data = response.get_json()
+        # Assertion for each employee creation and reporting manager
+        with client.application.app_context():
+            employee = Employee.query.get(employee_id)
+            assert employee is not None, f"Employee {i} was not created"
+            assert employee.Reporting_Manager == manager_id, f"Employee {employee_id} does not report to manager_id 2, but to {employee.Reporting_Manager}"
+    
+    # Set up a sample WFH arrangement for one employee
+    start_date = date.today()
+    create_work_arrangement(client, employees[1], "WFH", start_date, AM_PM="AM", status="Pending")
 
-    # # Assertions
-    # assert response.status_code == 200
-    # assert "daily_data" in data
-    # assert len(data["daily_data"]) == 3  # Expecting 3 days' data
-    # assert data["daily_data"][start_date.strftime('%Y-%m-%d')]["wfh_count_am"] == 1
-    # assert data["daily_data"][end_date.strftime('%Y-%m-%d')]["wfh_count_am"] == 1
-    # assert data["daily_data"][start_date.strftime('%Y-%m-%d')]["in_office_count_am"] == 1  # Assuming only two employees
-    pass
+    # Log in as the manager
+    login_user(client, email=manager_email)
+
+
+    # Make the request to fetch team arrangements
+    print(f'/team_arrangements_with_count?start_date={start_date}&end_date={start_date + timedelta(days=6)}')
+    response = client.get(f'/team_arrangements_with_count?start_date={start_date}&end_date={start_date + timedelta(days=6)}')
+    data = response.get_json()
+
+    print("Team Arrangements Response:", data)
+
+    # Assertions for the daily_data structure
+    assert response.status_code == 200
+    assert "daily_data" in data
+    assert len(data["daily_data"]) == 7  # 7 days' data
+    assert data["daily_data"][start_date.strftime('%Y-%m-%d')]["in_office_count_am"] == 5
+    assert data["daily_data"][start_date.strftime('%Y-%m-%d')]["in_office_count_pm"] == 5
+    assert data["daily_data"][start_date.strftime('%Y-%m-%d')]["wfh_count_am"] == 0
+    assert data["daily_data"][start_date.strftime('%Y-%m-%d')]["wfh_count_pm"] == 0
+
+    # Validate the team arrangements and team members structure
+    assert len(data["team_members"]) == 5
+    for member in data["team_members"]:
+        assert "staff_id" in member
