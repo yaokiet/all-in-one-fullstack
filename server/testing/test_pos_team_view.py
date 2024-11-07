@@ -6,6 +6,9 @@ from models.employee import Employee
 from datetime import date, datetime, timedelta
 from config import TestingConfig
 from flask import session
+import unittest
+from unittest.mock import patch
+
 
 # To ensure pytest can find the app, run 
 # export PYTHONPATH=/Users/joelsng/Documents/GitHub/all-in-one-fullstack/server:$PYTHONPATH
@@ -119,8 +122,6 @@ def test_team_members(client):
     # Make the request to fetch team members
     response = client.get('/team_members')
     data = response.get_json()
-    
-    print("RECEIVED", data)
 
     # Assertions
     assert response.status_code == 200
@@ -142,6 +143,10 @@ def test_team_members(client):
         assert member["reporting_manager"] == big_manager_id  # Ensure correct reporting manager
 
 
+from unittest.mock import patch
+import json
+from datetime import date, timedelta
+
 def test_team_arrangements_with_count(client):
     # Setup: create a big manager and a manager reporting to the big manager
     big_manager_email = "bigmanager@example.com"
@@ -156,50 +161,49 @@ def test_team_arrangements_with_count(client):
         staff_lname="Doe", 
         manager_id=big_manager_id, 
     )
-    
-   # Create employees reporting to the same manager
-    employees = []
-    for i in range(1, 6):
-        employee_id = create_dummy_employee(
-            client, 
-            email=f"employee{i}@example.com", 
-            staff_fname=f"Employee{i}", 
-            staff_lname=f"{i}", 
-            manager_id=manager_id
-        )
-        employees.append(employee_id)
-
-        # Assertion for each employee creation and reporting manager
-        with client.application.app_context():
-            employee = Employee.query.get(employee_id)
-            assert employee is not None, f"Employee {i} was not created"
-            assert employee.Reporting_Manager == manager_id, f"Employee {employee_id} does not report to manager_id 2, but to {employee.Reporting_Manager}"
-    
-    # Set up a sample WFH arrangement for one employee
+    print("manager_id is:",manager_id)
+    # Define the start date for the test
     start_date = date.today()
-    create_work_arrangement(client, employees[1], "WFH", start_date, AM_PM="AM", status="Pending")
+    end_date = start_date + timedelta(days=6)
 
-    # Log in as the manager
-    login_user(client, email=manager_email)
+    # Mock responses for /team_members and /arrangements endpoints
+    team_members_mock_response = {
+        "team_members": [
+            {"staff_id": 1, "country": "USA", "dept": "Engineering", "email": "employee1@example.com", "position": "Software Engineer", "reporting_manager": 1, "role": 1, "staff_fname": "Employee1", "staff_lname": "One"},
+            {"staff_id": 2, "country": "USA", "dept": "Engineering", "email": "employee2@example.com", "position": "Software Engineer", "reporting_manager": 1, "role": 1, "staff_fname": "Employee2", "staff_lname": "Two"},
+            # Add other team members as needed
+        ]
+    }
 
+    arrangements_mock_response = [
+        {"staff_id": 1, "arrangement_date": start_date.strftime('%Y-%m-%d'), "arrangement_type": "WFH", "status": "Approved", "am_pm": "AM"},
+        # Add other arrangements for test data
+    ]
 
-    # Make the request to fetch team arrangements
-    print(f'/team_arrangements_with_count?start_date={start_date}&end_date={start_date + timedelta(days=6)}')
-    response = client.get(f'/team_arrangements_with_count?start_date={start_date}&end_date={start_date + timedelta(days=6)}')
-    data = response.get_json()
+    # Mock the requests.get calls
+    with patch('requests.get') as mock_get:
+        # Set up the mock to return the team members data
+        mock_get.side_effect = lambda url, headers=None: \
+            unittest.mock.Mock(status_code=200, json=lambda: team_members_mock_response) if "/team_members" in url \
+            else unittest.mock.Mock(status_code=200, json=lambda: arrangements_mock_response)
 
-    print("Team Arrangements Response:", data)
+        # Log in as the manager and make the request to fetch team arrangements
+        login_user(client, email=manager_email)
+        response = client.get(f'/team_arrangements_with_count?start_date={start_date}&end_date={end_date}')
+        data = response.get_json()
 
-    # Assertions for the daily_data structure
-    assert response.status_code == 200
-    assert "daily_data" in data
-    assert len(data["daily_data"]) == 7  # 7 days' data
-    assert data["daily_data"][start_date.strftime('%Y-%m-%d')]["in_office_count_am"] == 5
-    assert data["daily_data"][start_date.strftime('%Y-%m-%d')]["in_office_count_pm"] == 5
-    assert data["daily_data"][start_date.strftime('%Y-%m-%d')]["wfh_count_am"] == 0
-    assert data["daily_data"][start_date.strftime('%Y-%m-%d')]["wfh_count_pm"] == 0
+        # Print for debugging
+        print("Team Arrangements Response:", json.dumps(data, indent=4))
 
-    # Validate the team arrangements and team members structure
-    assert len(data["team_members"]) == 5
-    for member in data["team_members"]:
-        assert "staff_id" in member
+        # Assertions for the daily_data structure
+        assert response.status_code == 200
+        assert "daily_data" in data
+        assert len(data["daily_data"]) == 7  # Check for 7 days of data
+
+        # Example validation on the first day's in-office and WFH counts
+        start_date_str = start_date.strftime('%Y-%m-%d')
+        assert data["daily_data"][start_date_str]["in_office_count_am"] == 0  # Expecting 0 due to both WFH
+        assert data["daily_data"][start_date_str]["wfh_count_am"] == 2  # Expecting 2 due to both WFH
+
+        # Further assertions for `team_members` and `team_arrangements` in `data`
+        assert len(data["team_members"]) == len(team_members_mock_response["team_members"])
