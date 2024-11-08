@@ -66,6 +66,7 @@ def team_members():
 @team_view_bp.route('/team_arrangements_with_count', methods=['GET'])
 def team_arrangements_with_count():
     staff_id = session.get('employee_id')
+    print("staff_id is", staff_id)
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
     
@@ -93,11 +94,12 @@ def team_arrangements_with_count():
 
     # Step 2: Call /team_members API to get the team members
     team_members_url = f'{PRODUCTION_URL}/team_members'
-    print(team_members_url)
     session_cookie = request.cookies.get('session')  # Get the session cookie from the original request
     headers = {'Cookie': f'session={session_cookie}'}  # Set the session cookie in the header
+    # print(team_members_url)
+    print(team_members_url)
     team_members_response = requests.get(team_members_url, headers=headers)
-
+    
     if team_members_response.status_code != 200:
         return jsonify({
             'message': 'Failed to retrieve team members',
@@ -143,7 +145,7 @@ def team_arrangements_with_count():
         
         # Fetch the arrangements for each team member
         arrangements_url = f'{PRODUCTION_URL}/arrangements?staff_id={member_id}&start_date={start_date.strftime("%Y-%m-%d")}&end_date={end_date.strftime("%Y-%m-%d")}'
-        arrangements_response = requests.get(arrangements_url)
+        arrangements_response = requests.get(arrangements_url, headers=headers)
 
         if arrangements_response.status_code == 200:
             arrangements = arrangements_response.json()
