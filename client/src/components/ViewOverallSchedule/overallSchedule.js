@@ -29,6 +29,7 @@ export default function OverallView({ currentDate }) {
     const fetchTeamArrangements = async () => {
       setIsLoading(true);
       try {
+        console.log(process.env.NEXT_PUBLIC_SERVER_URL)
         const start_date = format(currentWeekStart, "yyyy-MM-dd");
         const end_date = format(currentWeekEnd, "yyyy-MM-dd");
         const response = await fetch(
